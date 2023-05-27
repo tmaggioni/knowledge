@@ -7,24 +7,27 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "react-toastify";
 
-const validationSchema = z.object({
-  email: z.string().min(1, { message: "Email is required" }).email({
-    message: "Must be a valid email",
-  }),
-  password: z
-    .string()
-    .min(3, { message: "Password must be atleast 6 characters" }),
-});
+const validationSchema = z
+  .object({
+    email: z.string().min(1, { message: "Email is required" }).email({
+      message: "Must be a valid email",
+    }),
+    password: z
+      .string()
+      .min(3, { message: "Senha deve possuir no minimo 3 carácteres" }),
+    confirmPassword: z
+      .string()
+      .min(1, { message: "Senha deve possuir no minimo 3 carácteres" }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Senha não confere",
+  });
 
 type ValidationSchema = z.infer<typeof validationSchema>;
 
 const Register = () => {
-  const {
-    mutate: create,
-    isError,
-    error,
-    isLoading,
-  } = api.auth.register.useMutation();
+  const { mutate: create, isLoading } = api.auth.register.useMutation();
   const router = useRouter();
   const {
     register,
@@ -36,19 +39,20 @@ const Register = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const onSubmit = () => {
     create(
       { email, password },
       {
-        onSuccess: async () => {
+        onSuccess: () => {
           toast("Cadastrado com sucesso!");
           setTimeout(() => {
             router.push("/login");
           }, 1000);
         },
         onError: () => {
-          toast.error("Erro com o cadastro");
+          toast.error("Erro com o cadastro!");
         },
       }
     );
@@ -73,7 +77,7 @@ const Register = () => {
                   {...register("email", { required: true, maxLength: 20 })}
                   placeholder="E-mail"
                   className={`input-bordered input-primary input w-full max-w-xs ${
-                    errors.email && "border-error"
+                    errors.email ? "border-error" : ""
                   }`}
                   onChange={(e) => setEmail(e.target.value)}
                   value={email}
@@ -83,11 +87,27 @@ const Register = () => {
                   {...register("password", { required: true, maxLength: 20 })}
                   placeholder="Senha"
                   className={`input-bordered input-primary input w-full max-w-xs ${
-                    errors.password && "border-error"
+                    errors.password ? "border-error" : ""
                   }`}
                   onChange={(e) => setPassword(e.target.value)}
                   value={password}
                 />
+                <input
+                  type="password"
+                  {...register("confirmPassword", {
+                    required: true,
+                    maxLength: 20,
+                  })}
+                  placeholder="Confirme senha"
+                  className={`input-bordered input-primary input w-full max-w-xs ${
+                    errors.confirmPassword ? "border-error" : ""
+                  }`}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  value={confirmPassword}
+                />
+                {errors.confirmPassword && (
+                  <p className="text-error">{errors.confirmPassword.message}</p>
+                )}
                 <button className="btn-primary btn flex items-center gap-1">
                   {isLoading && (
                     <svg

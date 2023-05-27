@@ -1,11 +1,7 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
-import { api } from "~/utils/api";
 
 const Home: NextPage = () => {
-  const hello = api.example.hello.useQuery({ text: "from tRPC" });
-
   return (
     <>
       <Head>
@@ -17,8 +13,8 @@ const Home: NextPage = () => {
         <div className="hero-content text-center">
           <div className="max-w-md">
             <h1 className="text-5xl font-bold">Knowledge</h1>
-            <p className="py-6">{'=)'}</p>
-            <button className="btn btn-primary">Bora</button>
+            <p className="py-6">{"=)"}</p>
+            <button className="btn-primary btn">Bora</button>
           </div>
         </div>
       </div>

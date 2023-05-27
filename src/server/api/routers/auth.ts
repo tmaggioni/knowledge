@@ -22,7 +22,7 @@ export const authRouter = createTRPCRouter({
         });
       }
 
-      const hashPassword = await bcrypt.hashSync(input.password, 10);
+      const hashPassword = bcrypt.hashSync(input.password, 10);
       if (bcrypt.compareSync(password, hashPassword)) {
         const token = await new SignJWT({})
           .setProtectedHeader({ alg: "HS256" })
@@ -46,7 +46,7 @@ export const authRouter = createTRPCRouter({
   register: publicProcedure
     .input(z.object({ email: z.string().email(), password: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const hashPassword = await bcrypt.hashSync(input.password, 10);
+      const hashPassword = bcrypt.hashSync(input.password, 10);
       const user = await ctx.prisma.user.create({
         data: {
           email: input.email,
@@ -63,7 +63,7 @@ export const authRouter = createTRPCRouter({
       }
       return user;
     }),
-  logout: publicProcedure.mutation(async ({ ctx }) => {
+  logout: publicProcedure.mutation(({ ctx }) => {
     ctx.res.setHeader(
       "Set-Cookie",
       cookie.serialize("user-token", "", {
