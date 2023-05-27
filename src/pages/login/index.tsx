@@ -28,6 +28,7 @@ const Login = () => {
   const router = useRouter();
   const {
     register,
+    handleSubmit,
     formState: { errors },
   } = useForm<ValidationSchema>({
     resolver: zodResolver(validationSchema),
@@ -41,7 +42,7 @@ const Login = () => {
       { email, password },
       {
         onSuccess: () => {
-          router.push("/dashboard").catch((err) => console.log(err));
+          void router.push("/dashboard");
         },
       }
     );
@@ -60,6 +61,7 @@ const Login = () => {
             <h1 className="text-5xl font-bold">Knowledge</h1>
             <p className="py-6">Sisteminha pra gerenciar as contas</p>
             {isError && <p className="text-error">{error.message}</p>}
+
             <div className="mt-1 flex flex-col gap-2">
               {email}
               <input
@@ -85,7 +87,7 @@ const Login = () => {
               <button
                 className="btn-primary btn flex items-center gap-1"
                 onClick={() => {
-                  onSubmit();
+                  handleSubmit(onSubmit);
                 }}
               >
                 {isLoading && (
