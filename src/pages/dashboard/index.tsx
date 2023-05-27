@@ -8,9 +8,15 @@ const DashBoard = () => {
     <div className="flex h-screen flex-col justify-center bg-black align-middle text-white">
       Ola DashBoard
       <button
-        onClick={() =>
-          logout(undefined, { onSuccess: () => router.push("/login") })
-        }
+        onClick={() => {
+          logout(undefined, {
+            onSuccess: () => {
+              router.push("/login").catch((err) => {
+                console.log(err);
+              });
+            },
+          });
+        }}
       >
         Deslogar
       </button>
