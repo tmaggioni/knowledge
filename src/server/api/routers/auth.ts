@@ -23,8 +23,7 @@ export const authRouter = createTRPCRouter({
         })
       }
 
-      const hashPassword = bcrypt.hashSync(input.password, 10)
-      if (bcrypt.compareSync(password, hashPassword)) {
+      if (bcrypt.compareSync(password, user.password)) {
         const token = await new SignJWT({})
           .setProtectedHeader({ alg: 'HS256' })
           .setJti(nanoid())
@@ -41,13 +40,24 @@ export const authRouter = createTRPCRouter({
           }),
         )
 
-        return
+        const returnedUser = {
+          id: user.id,
+          parent: user.parent,
+        }
+
+        return returnedUser
       }
+
+      throw new TRPCError({
+        code: 'NOT_FOUND',
+        message: 'Dados incorretos',
+      })
     }),
   register: publicProcedure
     .input(z.object({ email: z.string().email(), password: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const hashPassword = bcrypt.hashSync(input.password, 10)
+      const salt = bcrypt.genSaltSync(10)
+      const hashPassword = bcrypt.hashSync(input.password, salt)
       const user = await ctx.prisma.user.create({
         data: {
           email: input.email,

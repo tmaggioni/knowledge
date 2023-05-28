@@ -6,7 +6,11 @@ export async function middleware(req: NextRequest) {
   const token = req.cookies.get('user-token')?.value
   const verifiedToken =
     token && (await verifyAuth(token).catch((err) => console.log(err)))
-  if (req.nextUrl.pathname.startsWith('/login') && !verifiedToken) {
+  if (
+    (req.nextUrl.pathname.startsWith('/login') ||
+      req.nextUrl.pathname.startsWith('/register')) &&
+    !verifiedToken
+  ) {
     return
   }
 
@@ -23,5 +27,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard', '/login', '/', '/register'],
+  matcher: ['/dashboard', '/dashboard/users', '/login', '/', '/register'],
 }

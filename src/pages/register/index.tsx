@@ -62,10 +62,10 @@ const Register = () => {
             void router.push('/dashboard')
           }, 1000)
         },
-        onError: () => {
+        onError: (err) => {
           toast({
             title: 'Erro',
-            description: 'Erro ao cadastrar',
+            description: err.message,
             variant: 'destructive',
           })
         },

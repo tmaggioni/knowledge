@@ -16,6 +16,7 @@ import {
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
 import { useToast } from '~/components/ui/use-toast'
+import { useAppStore } from '~/hooks/useAppStore'
 
 import { api } from '../../utils/api'
 
@@ -32,6 +33,7 @@ type ValidationSchema = z.infer<typeof validationSchema>
 
 const Login = () => {
   const { mutate: login, isLoading } = api.auth.login.useMutation()
+  const setUser = useAppStore((state) => state.setUser)
   const { toast } = useToast()
   const router = useRouter()
   const form = useForm<ValidationSchema>({
@@ -45,8 +47,17 @@ const Login = () => {
     login(
       { email: values.email, password: values.password },
       {
-        onSuccess: () => {
-          void router.push('/dashboard')
+        onSuccess: (data) => {
+          if (data) {
+            setUser(data)
+            void router.push('/dashboard')
+          }
+        },
+        onError: (err) => {
+          toast({
+            title: 'Erro',
+            description: err.message,
+          })
         },
       },
     )

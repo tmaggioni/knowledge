@@ -1,26 +1,17 @@
 import { useRouter } from 'next/router'
 
-import { api } from '~/utils/api'
+import { BarKnowledge } from '~/components/charts/barKnowledge'
+import { PieKnowledge } from '~/components/charts/pieKnowledge'
+import Layout from '~/components/layout/layout'
 
 const DashBoard = () => {
-  const router = useRouter()
-  const { mutate: logout } = api.auth.logout.useMutation()
   return (
-    <div className='flex h-screen flex-col justify-center bg-black align-middle text-white'>
-      <button
-        onClick={() => {
-          logout(undefined, {
-            onSuccess: () => {
-              router.push('/login').catch((err) => {
-                console.log(err)
-              })
-            },
-          })
-        }}
-      >
-        Deslogar
-      </button>
-    </div>
+    <Layout>
+      <div className='flex'>
+        <PieKnowledge />
+        <BarKnowledge />
+      </div>
+    </Layout>
   )
 }
 
