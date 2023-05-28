@@ -1,15 +1,18 @@
-import { type AppType } from "next/app";
-import { api } from "~/utils/api";
-import "~/styles/globals.css";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { type AppType } from 'next/app'
+
+import { ToastContainer } from 'react-toastify'
+
+import { api } from '~/utils/api'
+
+import '~/styles/globals.css'
+import 'react-toastify/dist/ReactToastify.css'
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
     <>
       <Component {...pageProps} />
       <ToastContainer
-        position="top-right"
+        position='top-right'
         autoClose={5000}
         hideProgressBar={false}
         newestOnTop={false}
@@ -18,10 +21,10 @@ const MyApp: AppType = ({ Component, pageProps }) => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="light"
+        theme='light'
       />
     </>
-  );
-};
+  )
+}
 
-export default api.withTRPC(MyApp);
+export default api.withTRPC(MyApp)

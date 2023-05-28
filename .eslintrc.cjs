@@ -1,27 +1,53 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const path = require("path");
+const path = require('path')
 
 /** @type {import("eslint").Linter.Config} */
 const config = {
   overrides: [
     {
       extends: [
-        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        'plugin:@typescript-eslint/recommended-requiring-type-checking',
       ],
-      files: ["*.ts", "*.tsx"],
+      files: ['*.ts', '*.tsx'],
       parserOptions: {
-        project: path.join(__dirname, "tsconfig.json"),
+        project: path.join(__dirname, 'tsconfig.json'),
       },
     },
   ],
-  parser: "@typescript-eslint/parser",
+  parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: path.join(__dirname, "tsconfig.json"),
+    project: path.join(__dirname, 'tsconfig.json'),
   },
-  plugins: ["@typescript-eslint"],
-  extends: ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
+  plugins: ['@typescript-eslint', 'simple-import-sort'],
+  extends: ['next/core-web-vitals', 'plugin:@typescript-eslint/recommended'],
   rules: {
-    "@typescript-eslint/no-misused-promises": [
+    'simple-import-sort/imports': [
+      'error',
+      {
+        groups: [
+          // "react" imports or starting with "react/"
+          ['^react(?:/.*)?$'],
+          // "next" imports or starting with "next/"
+          ['^next(?:/.*)?$'],
+          // Imports starting with a letter or "@"
+          ['^[a-zA-Z@]'],
+          // Imports starting with "~" our paths are set in tsconfig.json
+          ['^~'],
+          // Imports starting with ".."
+          ['^\\.\\.'],
+          // Imports starting with "."
+          ['^\\.'],
+          // Side effect imports
+          ['^\\u0000'],
+          // CSS files
+          ['.*\\.css$'],
+          // Anything not matched in another group
+          ['^'],
+        ],
+      },
+    ],
+    'simple-import-sort/exports': 'error',
+    '@typescript-eslint/no-misused-promises': [
       2,
       {
         checksVoidReturn: {
@@ -29,15 +55,15 @@ const config = {
         },
       },
     ],
-    "@typescript-eslint/consistent-type-imports": [
-      "warn",
+    '@typescript-eslint/consistent-type-imports': [
+      'warn',
       {
-        prefer: "type-imports",
-        fixStyle: "inline-type-imports",
+        prefer: 'type-imports',
+        fixStyle: 'inline-type-imports',
       },
     ],
-    "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
   },
-};
+}
 
-module.exports = config;
+module.exports = config
