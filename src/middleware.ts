@@ -10,7 +10,10 @@ export async function middleware(req: NextRequest) {
     return
   }
 
-  if (req.url.includes('/login') && verifiedToken) {
+  if (
+    req.url.includes('/login') ||
+    (req.url.includes('/register') && verifiedToken)
+  ) {
     return NextResponse.redirect(new URL('/dashboard', req.url))
   }
 
@@ -20,5 +23,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard', '/login', '/'],
+  matcher: ['/dashboard', '/login', '/', '/register'],
 }
