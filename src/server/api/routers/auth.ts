@@ -6,7 +6,11 @@ import { nanoid } from 'nanoid'
 import { z } from 'zod'
 
 import { getJwtSecretKey } from '~/lib/auth'
-import { createTRPCRouter, publicProcedure } from '~/server/api/trpc'
+import {
+  createTRPCRouter,
+  privateProcedure,
+  publicProcedure,
+} from '~/server/api/trpc'
 
 export const authRouter = createTRPCRouter({
   login: publicProcedure
@@ -24,7 +28,7 @@ export const authRouter = createTRPCRouter({
       }
 
       if (bcrypt.compareSync(password, user.password)) {
-        const token = await new SignJWT({})
+        const token = await new SignJWT({ userId: user.id })
           .setProtectedHeader({ alg: 'HS256' })
           .setJti(nanoid())
           .setIssuedAt()
@@ -74,7 +78,7 @@ export const authRouter = createTRPCRouter({
       }
       return user
     }),
-  logout: publicProcedure.mutation(({ ctx }) => {
+  logout: privateProcedure.mutation(({ ctx }) => {
     ctx.res.setHeader(
       'Set-Cookie',
       cookie.serialize('user-token', '', {

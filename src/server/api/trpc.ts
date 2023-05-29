@@ -6,11 +6,12 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { initTRPC } from '@trpc/server'
+import { initTRPC, TRPCError } from '@trpc/server'
 import { type CreateNextContextOptions } from '@trpc/server/adapters/next'
 import superjson from 'superjson'
 import { ZodError } from 'zod'
 
+import { verifyAuth } from '~/lib/auth'
 import { prisma } from '~/server/db'
 
 /**
@@ -76,6 +77,22 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
     }
   },
 })
+
+export const isAuthed = t.middleware(async ({ ctx, next }) => {
+  const { req } = ctx
+  const token = req.cookies['user-token']
+
+  if (!token) throw new TRPCError({ code: 'UNAUTHORIZED' })
+  const payload = await verifyAuth(token)
+
+  return next({
+    ctx: {
+      userId: payload.userId,
+    },
+  })
+})
+
+export const privateProcedure = t.procedure.use(isAuthed)
 
 /**
  * 3. ROUTER & PROCEDURE (THE IMPORTANT BIT)

@@ -15,7 +15,7 @@ import { cn } from '~/lib/utils'
 
 export function Sidebar({ className }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('max-w-[250px]', className)}>
+    <div className={cn('max-w-[250px] border-r-2', className)}>
       <div className='space-y-4 py-4'>
         <div className='px-4 py-2'>
           <h2 className='mb-2 px-2 text-lg font-semibold tracking-tight'>
