@@ -78,6 +78,7 @@ export const authRouter = createTRPCRouter({
       }
       return user
     }),
+
   logout: privateProcedure.mutation(({ ctx }) => {
     ctx.res.setHeader(
       'Set-Cookie',

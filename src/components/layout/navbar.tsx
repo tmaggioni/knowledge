@@ -43,22 +43,6 @@ export const Navbar = () => {
                 aria-orientation='vertical'
                 aria-labelledby='user-menu-button'
               >
-                <a
-                  href='#'
-                  className='block px-4 py-2 text-sm text-gray-700'
-                  role='menuitem'
-                  id='user-menu-item-0'
-                >
-                  Your Profile
-                </a>
-                <a
-                  href='#'
-                  className='block px-4 py-2 text-sm text-gray-700'
-                  role='menuitem'
-                  id='user-menu-item-1'
-                >
-                  Settings
-                </a>
                 <button
                   className='block px-4 py-2 text-sm text-gray-700'
                   role='menuitem'
@@ -72,7 +56,7 @@ export const Navbar = () => {
                     })
                   }}
                 >
-                  Sign out
+                  Sair
                 </button>
               </div>
             </div>
