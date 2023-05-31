@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Edit, Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
 import { z } from 'zod'
 
 import { Button } from '~/components/ui/button'
@@ -21,7 +22,6 @@ import {
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
 import { Textarea } from '~/components/ui/textarea'
-import { useToast } from '~/components/ui/use-toast'
 import { api } from '~/utils/api'
 
 const validationSchema = z.object({
@@ -37,7 +37,6 @@ interface PropsFormEntity {
 }
 
 const FormEditEntity = ({ onSuccess, entityId }: PropsFormEntity) => {
-  const { toast } = useToast()
   const { data: entity, isLoading } = api.entity.getById.useQuery({
     id: entityId,
   })
@@ -63,18 +62,15 @@ const FormEditEntity = ({ onSuccess, entityId }: PropsFormEntity) => {
       },
       {
         onSuccess: (data) => {
-          toast({
-            title: 'Sucesso',
-            description: `Entidade ${data.name} editada com sucesso`,
+          toast(`Entidade ${data.name} editada com sucesso`, {
+            type: 'success',
           })
           void utils.entity.getAll.invalidate()
           onSuccess()
         },
         onError: (err) => {
-          toast({
-            title: 'Erro',
-            description: err.message,
-            variant: 'destructive',
+          toast(err.message, {
+            type: 'error',
           })
         },
       },

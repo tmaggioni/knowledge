@@ -1,8 +1,9 @@
-import { type ReactNode, useState } from 'react'
+import { useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
 import { z } from 'zod'
 
 import { Button } from '~/components/ui/button'
@@ -20,7 +21,6 @@ import {
   FormMessage,
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
-import { useToast } from '~/components/ui/use-toast'
 import { api } from '~/utils/api'
 
 const validationSchema = z
@@ -58,8 +58,6 @@ const FormCreateUser = ({ onSuccess }: Props) => {
     },
   })
 
-  const { toast } = useToast()
-
   const { mutate: create, isLoading } = api.user.create.useMutation()
   const utils = api.useContext()
 
@@ -68,18 +66,15 @@ const FormCreateUser = ({ onSuccess }: Props) => {
       { email: values.email, password: values.password },
       {
         onSuccess: (data) => {
-          toast({
-            title: 'Sucesso',
-            description: `Usuário ${data.email} adicionado com sucesso`,
+          toast(`Usuário ${data.email} adicionado com sucesso`, {
+            type: 'success',
           })
           void utils.user.getAll.invalidate()
           onSuccess()
         },
         onError: (err) => {
-          toast({
-            title: 'Erro',
-            description: err.message,
-            variant: 'destructive',
+          toast(err.message, {
+            type: 'success',
           })
         },
       },

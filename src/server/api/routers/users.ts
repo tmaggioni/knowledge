@@ -40,7 +40,7 @@ export const userRouter = createTRPCRouter({
     }),
   getAll: privateProcedure.query(async ({ ctx }) => {
     const parent = ctx.parent || ctx.userId
-    console.log({ parent })
+
     const users = await ctx.prisma.user.findMany({
       where: { parent: parent as string },
     })
@@ -66,5 +66,61 @@ export const userRouter = createTRPCRouter({
       }
 
       return deleted
+    }),
+  permissions: privateProcedure
+    .input(
+      z.object({
+        entities: z.array(z.object({ entityId: z.string() })),
+        userId: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { entities, userId } = input
+
+      const entitiesData = entities.map((item) => ({
+        entity: {
+          connect: { id: item.entityId },
+        },
+      }))
+
+      const user = await ctx.prisma.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          entitiesUsers: {
+            deleteMany: {},
+            create: entitiesData.length > 0 ? entitiesData : [],
+          },
+        },
+      })
+
+      if (!user) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Problema ao alterar permissão o usuário',
+        })
+      }
+
+      return user
+    }),
+  getUserWithPermissions: privateProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const { userId } = input
+
+      const userWithPermissions = await ctx.prisma.user.findUnique({
+        where: { id: userId },
+        include: { entitiesUsers: { select: { entity: true } } },
+      })
+
+      if (!userWithPermissions) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Problema ao receber dados',
+        })
+      }
+
+      return { ...userWithPermissions, password: 'Hahaha malandro' }
     }),
 })

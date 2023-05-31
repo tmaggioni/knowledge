@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
 import { z } from 'zod'
 
 import { Button } from '~/components/ui/button'
@@ -15,7 +16,6 @@ import {
   FormMessage,
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
-import { useToast } from '~/components/ui/use-toast'
 
 import { api } from '../../utils/api'
 
@@ -40,7 +40,6 @@ type ValidationSchema = z.infer<typeof validationSchema>
 
 const Register = () => {
   const { mutate: create, isLoading } = api.auth.register.useMutation()
-  const { toast } = useToast()
   const router = useRouter()
   const form = useForm<ValidationSchema>({
     resolver: zodResolver(validationSchema),
@@ -54,19 +53,16 @@ const Register = () => {
       { email: values.email, password: values.password },
       {
         onSuccess: () => {
-          toast({
-            title: 'Sucesso',
-            description: 'Cadastro realizado com sucesso',
+          toast('Cadastro realizado com sucesso', {
+            type: 'success',
           })
           setTimeout(() => {
             void router.push('/dashboard')
           }, 1000)
         },
         onError: (err) => {
-          toast({
-            title: 'Erro',
-            description: err.message,
-            variant: 'destructive',
+          toast(err.message, {
+            type: 'error',
           })
         },
       },

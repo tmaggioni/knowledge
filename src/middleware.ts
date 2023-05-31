@@ -1,11 +1,19 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
+import { type JWTPayload } from 'jose'
+
 import { verifyAuth } from './lib/auth'
+
+interface UserJwtPayload extends JWTPayload {
+  jti: string
+  iat: number
+  userid: string
+  parent: string
+}
 
 export async function middleware(req: NextRequest) {
   const token = req.cookies.get('user-token')?.value
-  const verifiedToken =
-    token && (await verifyAuth(token).catch((err) => console.log(err)))
+  const verifiedToken = token && (await verifyAuth(token))
   if (
     (req.nextUrl.pathname.startsWith('/login') ||
       req.nextUrl.pathname.startsWith('/register')) &&
@@ -21,11 +29,26 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', req.url))
   }
 
+  if (
+    (req.url.includes('/entity') || req.url.includes('/users')) &&
+    (verifiedToken as UserJwtPayload).parent
+  ) {
+    return NextResponse.redirect(new URL('/dashboard', req.url))
+  }
+
   if (!verifiedToken) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
 }
 
 export const config = {
-  matcher: ['/dashboard', '/dashboard/users', '/login', '/', '/register'],
+  matcher: [
+    '/dashboard',
+    '/dashboard/users',
+    '/login',
+    '/',
+    '/register',
+    '/dashboard/entity',
+    '/dashboard/users',
+  ],
 }

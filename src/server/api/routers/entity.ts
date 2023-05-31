@@ -9,7 +9,7 @@ export const entityRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { name, description } = input
 
-      const userId = ctx.userId
+      const userId = ctx.parent || ctx.userId
       const entity = await ctx.prisma.entity.create({
         data: {
           name,
@@ -52,12 +52,34 @@ export const entityRouter = createTRPCRouter({
       return entity
     }),
   getAll: privateProcedure.query(async ({ ctx }) => {
+    // if (ctx.parent) {
+    //   throw new TRPCError({
+    //     code: 'FORBIDDEN',
+    //     message: 'Proibido',
+    //   })
+    // }
     const parent = ctx.parent || ctx.userId
-    const users = await ctx.prisma.entity.findMany({
+    const entities = await ctx.prisma.entity.findMany({
       where: { parentId: parent as string },
     })
 
-    return users
+    return entities
+  }),
+  getAllByUser: privateProcedure.query(async ({ ctx }) => {
+    const userWithEntities = await ctx.prisma.user.findUnique({
+      where: {
+        id: ctx.userId as string,
+      },
+      include: {
+        entitiesUsers: {
+          select: {
+            entity: true,
+          },
+        },
+      },
+    })
+
+    return userWithEntities?.entitiesUsers
   }),
   getById: privateProcedure
     .input(z.object({ id: z.string() }))

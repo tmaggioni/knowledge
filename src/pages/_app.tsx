@@ -1,15 +1,17 @@
 import { type AppType } from 'next/app'
 
-import { Toaster } from '~/components/ui/toaster'
+import { ToastContainer } from 'react-toastify'
+
 import { api } from '~/utils/api'
 
+import 'react-toastify/dist/ReactToastify.css'
 import '~/styles/globals.css'
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
     <>
       <Component {...pageProps} />
-      <Toaster />
+      <ToastContainer />
     </>
   )
 }

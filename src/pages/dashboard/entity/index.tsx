@@ -4,12 +4,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { type Entity } from '@prisma/client'
 import { type ColumnDef } from '@tanstack/react-table'
 import { DeleteIcon, Edit, Loader } from 'lucide-react'
+import { toast } from 'react-toastify'
 
 import Layout from '~/components/layout/layout'
 import { Breadcrumb } from '~/components/ui/breadcrumb'
 import { Button } from '~/components/ui/button'
 import { DataTable } from '~/components/ui/data-table'
-import { useToast } from '~/components/ui/use-toast'
 import { api } from '~/utils/api'
 
 import { DialogCreateEntity } from './dialogCreate'
@@ -20,24 +20,20 @@ const Users = () => {
   const { mutate: removeEntity, isLoading: isLoadingRemove } =
     api.entity.remove.useMutation()
   const utils = api.useContext()
-  const { toast } = useToast()
 
   const handleRemoveEntity = (id: string) => {
     removeEntity(
       { id },
       {
         onSuccess: (data) => {
-          toast({
-            title: 'Sucesso',
-            description: `Entidade ${data.name} removida com sucesso`,
+          toast(`Entidade ${data.name} removida com sucesso`, {
+            type: 'success',
           })
           void utils.entity.getAll.invalidate()
         },
         onError: (err) => {
-          toast({
-            title: 'Erro',
-            description: err.message,
-            variant: 'destructive',
+          toast(err.message, {
+            type: 'error',
           })
         },
       },

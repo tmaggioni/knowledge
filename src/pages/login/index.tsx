@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
 import { z } from 'zod'
 
 import { Button } from '~/components/ui/button'
@@ -15,7 +16,6 @@ import {
   FormMessage,
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
-import { useToast } from '~/components/ui/use-toast'
 import { useAppStore } from '~/hooks/useAppStore'
 
 import { api } from '../../utils/api'
@@ -34,7 +34,7 @@ type ValidationSchema = z.infer<typeof validationSchema>
 const Login = () => {
   const { mutate: login, isLoading } = api.auth.login.useMutation()
   const setUser = useAppStore((state) => state.setUser)
-  const { toast } = useToast()
+
   const router = useRouter()
   const form = useForm<ValidationSchema>({
     resolver: zodResolver(validationSchema),
@@ -54,9 +54,8 @@ const Login = () => {
           }
         },
         onError: (err) => {
-          toast({
-            title: 'Erro',
-            description: err.message,
+          toast(err.message, {
+            type: 'error',
           })
         },
       },

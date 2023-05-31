@@ -13,13 +13,13 @@ interface AppStoreState {
 
 export const useAppStore = create<AppStoreState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       setUser: (user) => set({ user }),
     }),
     {
-      name: 'user-storage', // unique name
-      storage: createJSONStorage(() => sessionStorage), // (optional) by default, 'localStorage' is used
+      name: 'user-storage',
+      storage: createJSONStorage(() => sessionStorage),
     },
   ),
 )

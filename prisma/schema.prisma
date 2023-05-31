@@ -15,8 +15,9 @@ model User {
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
   parent    String
-  entity    Entity[]
-  permissions Permission[]
+  entities  Entity[]
+  entitiesUsers UsersEntity[]
+  
 }
 
 model Entity {
@@ -25,20 +26,18 @@ model Entity {
   description String
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
-  parent      User              @relation(fields: [parentId], references: [id])
+  parent      User              @relation(fields: [parentId], references: [id]) 
   parentId    String
-  permissions Permission[]
-  
+  users       UsersEntity[]
   @@index([parentId])
 }
 
-model Permission{
+model UsersEntity {
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entityId    String
+  entity       Entity @relation(fields: [entityId], references: [id])
   
-  user User @relation(fields: [userId], references: [id])
-  userId String
-  entity Entity @relation(fields: [entityId], references: [id])
-  entityId String
-
   @@id([userId, entityId])
   @@index([userId])
   @@index([entityId])

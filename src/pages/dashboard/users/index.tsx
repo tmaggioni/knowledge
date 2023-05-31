@@ -1,39 +1,37 @@
 import { type User } from '@prisma/client'
 import { type ColumnDef } from '@tanstack/react-table'
-import { DeleteIcon, Edit, Loader } from 'lucide-react'
+import { Loader } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
+import { toast } from 'react-toastify'
 
 import Layout from '~/components/layout/layout'
 import { Breadcrumb } from '~/components/ui/breadcrumb'
 import { Button } from '~/components/ui/button'
 import { DataTable } from '~/components/ui/data-table'
-import { useToast } from '~/components/ui/use-toast'
 import { api } from '~/utils/api'
 
 import { DialogCreateUser } from './dialogCreate'
+import { DialogPermissions } from './dialogPermissions'
 
 const Users = () => {
   const { data: users, isLoading, isFetching } = api.user.getAll.useQuery()
   const { mutate: removeUser, isLoading: isLoadingRemove } =
     api.user.remove.useMutation()
   const utils = api.useContext()
-  const { toast } = useToast()
 
   const handleRemoveUser = (id: string) => {
     removeUser(
       { id },
       {
         onSuccess: (data) => {
-          toast({
-            title: 'Sucesso',
-            description: `Usuário ${data.email} removido com sucesso`,
+          toast(`Usuário ${data.email} removido com sucesso`, {
+            type: 'success',
           })
           void utils.user.getAll.invalidate()
         },
         onError: (err) => {
-          toast({
-            title: 'Erro',
-            description: err.message,
-            variant: 'destructive',
+          toast(err.message, {
+            type: 'error',
           })
         },
       },
@@ -53,20 +51,14 @@ const Users = () => {
 
         return (
           <div className='text-right'>
-            <Button
-              variant='ghost'
-              className='h-8 w-8 p-0'
-              onClick={() => alert(user.email)}
-            >
-              <Edit size={20} />
-            </Button>
+            <DialogPermissions userId={user.id} />
             <Button
               disabled={isLoadingRemove}
               variant='ghost'
               className='h-8 w-8 p-0'
               onClick={() => handleRemoveUser(user.id)}
             >
-              <DeleteIcon size={20} color={'hsl(var(--destructive))'} />
+              <Trash2 size={20} color={'hsl(var(--destructive))'} />
             </Button>
           </div>
         )
