@@ -20,7 +20,7 @@ export function Sidebar({ className }: React.HTMLAttributes<HTMLDivElement>) {
             </Button>
             <Button variant='ghost' size='sm' className='w-full justify-start'>
               <User className='mr-2 h-4 w-4' />
-              <Link href='/dashboard/users'>Entidades</Link>
+              <Link href='/dashboard/entity'>Entidades</Link>
             </Button>
           </div>
         </div>

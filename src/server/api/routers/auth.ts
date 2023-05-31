@@ -28,7 +28,10 @@ export const authRouter = createTRPCRouter({
       }
 
       if (bcrypt.compareSync(password, user.password)) {
-        const token = await new SignJWT({ userId: user.id })
+        const token = await new SignJWT({
+          userId: user.id,
+          parent: user.parent,
+        })
           .setProtectedHeader({ alg: 'HS256' })
           .setJti(nanoid())
           .setIssuedAt()

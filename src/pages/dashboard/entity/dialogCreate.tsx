@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react'
+import { useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
@@ -20,29 +20,14 @@ import {
   FormMessage,
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
+import { Textarea } from '~/components/ui/textarea'
 import { useToast } from '~/components/ui/use-toast'
 import { api } from '~/utils/api'
 
-const validationSchema = z
-  .object({
-    email: z.string().min(1, { message: 'e-mail é obrigatório' }).email({
-      message: 'Precisa ser um e-mail válido',
-    }),
-    password: z
-      .string({
-        required_error: 'campo obrigatório',
-      })
-      .min(3, { message: 'Senha deve possuir no minimo 3 carácteres' }),
-    confirmPassword: z
-      .string({
-        required_error: 'campo obrigatório',
-      })
-      .min(1, { message: 'Senha deve possuir no minimo 3 carácteres' }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    path: ['confirmPassword'],
-    message: 'Senha não confere',
-  })
+const validationSchema = z.object({
+  name: z.string().min(1, { message: 'nome é obrigatório' }),
+  description: z.string().optional(),
+})
 
 type ValidationSchema = z.infer<typeof validationSchema>
 
@@ -50,29 +35,26 @@ interface Props {
   onSuccess: () => void
 }
 
-const FormCreateUser = ({ onSuccess }: Props) => {
+const FormCreateEntity = ({ onSuccess }: Props) => {
   const form = useForm<ValidationSchema>({
     resolver: zodResolver(validationSchema),
-    defaultValues: {
-      email: '',
-    },
   })
 
   const { toast } = useToast()
 
-  const { mutate: create, isLoading } = api.user.create.useMutation()
+  const { mutate: create, isLoading } = api.entity.create.useMutation()
   const utils = api.useContext()
 
   function onSubmit(values: ValidationSchema) {
     create(
-      { email: values.email, password: values.password },
+      { name: values.name, description: values.description || '' },
       {
         onSuccess: (data) => {
           toast({
             title: 'Sucesso',
-            description: `Usuário ${data.email} adicionado com sucesso`,
+            description: `Entidade ${data.name} adicionada com sucesso`,
           })
-          void utils.user.getAll.invalidate()
+          void utils.entity.getAll.invalidate()
           onSuccess()
         },
         onError: (err) => {
@@ -93,11 +75,11 @@ const FormCreateUser = ({ onSuccess }: Props) => {
       >
         <FormField
           control={form.control}
-          name='email'
+          name='name'
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Input placeholder='E-mail' {...field} />
+                <Input placeholder='Nome' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -105,27 +87,11 @@ const FormCreateUser = ({ onSuccess }: Props) => {
         />
         <FormField
           control={form.control}
-          name='password'
+          name='description'
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Input placeholder='Senha' type='password' {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='confirmPassword'
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Input
-                  placeholder='Confirme a senha'
-                  type='password'
-                  {...field}
-                />
+                <Textarea placeholder='Descrição' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -141,20 +107,20 @@ const FormCreateUser = ({ onSuccess }: Props) => {
   )
 }
 
-export function DialogCreateUser() {
+export function DialogCreateEntity() {
   const [modalOpen, setModalOpen] = useState<boolean | undefined>(false)
 
   return (
     <Dialog open={modalOpen} onOpenChange={setModalOpen}>
       <Button variant='default' onClick={() => setModalOpen(true)}>
-        Novo usuário
+        Nova entidade
       </Button>
 
       <DialogContent className='sm:max-w-[425px]'>
         <DialogHeader>
-          <DialogTitle>Adicionar usuário</DialogTitle>
+          <DialogTitle>Adicionar entidade</DialogTitle>
         </DialogHeader>
-        <FormCreateUser onSuccess={() => setModalOpen(false)} />
+        <FormCreateEntity onSuccess={() => setModalOpen(false)} />
       </DialogContent>
     </Dialog>
   )

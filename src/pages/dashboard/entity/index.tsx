@@ -1,4 +1,7 @@
-import { type User } from '@prisma/client'
+import { useRouter } from 'next/router'
+
+import { zodResolver } from '@hookform/resolvers/zod'
+import { type Entity } from '@prisma/client'
 import { type ColumnDef } from '@tanstack/react-table'
 import { DeleteIcon, Edit, Loader } from 'lucide-react'
 
@@ -9,25 +12,26 @@ import { DataTable } from '~/components/ui/data-table'
 import { useToast } from '~/components/ui/use-toast'
 import { api } from '~/utils/api'
 
-import { DialogCreateUser } from './dialogCreate'
+import { DialogCreateEntity } from './dialogCreate'
+import { DialogEditEntity } from './dialogEdit'
 
 const Users = () => {
-  const { data: users, isLoading, isFetching } = api.user.getAll.useQuery()
-  const { mutate: removeUser, isLoading: isLoadingRemove } =
-    api.user.remove.useMutation()
+  const { data: entities, isLoading, isFetching } = api.entity.getAll.useQuery()
+  const { mutate: removeEntity, isLoading: isLoadingRemove } =
+    api.entity.remove.useMutation()
   const utils = api.useContext()
   const { toast } = useToast()
 
-  const handleRemoveUser = (id: string) => {
-    removeUser(
+  const handleRemoveEntity = (id: string) => {
+    removeEntity(
       { id },
       {
         onSuccess: (data) => {
           toast({
             title: 'Sucesso',
-            description: `Usuário ${data.email} removido com sucesso`,
+            description: `Entidade ${data.name} removida com sucesso`,
           })
-          void utils.user.getAll.invalidate()
+          void utils.entity.getAll.invalidate()
         },
         onError: (err) => {
           toast({
@@ -40,31 +44,29 @@ const Users = () => {
     )
   }
 
-  const columns: ColumnDef<User>[] = [
+  const columns: ColumnDef<Entity>[] = [
     {
-      accessorKey: 'email',
-      header: 'E-mail',
+      accessorKey: 'name',
+      header: 'Nome',
+    },
+    {
+      accessorKey: 'description',
+      header: 'Descrição',
     },
     {
       accessorKey: 'actions',
       header: () => <div className='text-right'>{'Editar/Deletar'}</div>,
       cell: ({ row }) => {
-        const user = row.original
+        const entity = row.original
 
         return (
           <div className='text-right'>
-            <Button
-              variant='ghost'
-              className='h-8 w-8 p-0'
-              onClick={() => alert(user.email)}
-            >
-              <Edit size={20} />
-            </Button>
+            <DialogEditEntity entityId={entity.id} />
             <Button
               disabled={isLoadingRemove}
               variant='ghost'
               className='h-8 w-8 p-0'
-              onClick={() => handleRemoveUser(user.id)}
+              onClick={() => handleRemoveEntity(entity.id)}
             >
               <DeleteIcon size={20} color={'hsl(var(--destructive))'} />
             </Button>
@@ -80,19 +82,19 @@ const Users = () => {
         <Breadcrumb
           links={[
             { label: 'Dashboard', link: '/dashboard' },
-            { label: 'Usuários' },
+            { label: 'Entidades' },
           ]}
         />
         <div className='flex max-w-[50%] flex-col items-start gap-2'>
           <div className='flex items-center gap-2'>
-            <DialogCreateUser />
+            <DialogCreateEntity />
             {(isLoading || isFetching) && (
               <Loader className='mr-2 h-4 w-4 animate-spin' />
             )}
           </div>
 
           {!isLoading && (
-            <DataTable columns={columns} data={users ? users : []} />
+            <DataTable columns={columns} data={entities ? entities : []} />
           )}
         </div>
       </>

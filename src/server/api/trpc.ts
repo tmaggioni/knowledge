@@ -88,6 +88,7 @@ export const isAuthed = t.middleware(async ({ ctx, next }) => {
   return next({
     ctx: {
       userId: payload.userId,
+      parent: payload.parent,
     },
   })
 })

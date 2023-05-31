@@ -1,6 +1,7 @@
 import { createTRPCRouter } from '~/server/api/trpc'
 
 import { authRouter } from './routers/auth'
+import { entityRouter } from './routers/entity'
 import { userRouter } from './routers/users'
 
 /**
@@ -11,6 +12,7 @@ import { userRouter } from './routers/users'
 export const appRouter = createTRPCRouter({
   auth: authRouter,
   user: userRouter,
+  entity: entityRouter,
 })
 
 // export type definition of API

@@ -4,6 +4,7 @@ interface UserJwtPayload extends JWTPayload {
   jti: string
   iat: number
   userid: string
+  parent: string
 }
 
 export const getJwtSecretKey = () => {
