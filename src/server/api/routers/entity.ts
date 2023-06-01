@@ -71,6 +71,12 @@ export const entityRouter = createTRPCRouter({
         id: ctx.userId as string,
       },
       include: {
+        entities: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         entitiesUsers: {
           select: {
             entity: true,
@@ -79,7 +85,10 @@ export const entityRouter = createTRPCRouter({
       },
     })
 
-    return userWithEntities?.entitiesUsers
+    return {
+      entitiesUsers: userWithEntities?.entitiesUsers,
+      entitiesParent: userWithEntities?.entities,
+    }
   }),
   getById: privateProcedure
     .input(z.object({ id: z.string() }))

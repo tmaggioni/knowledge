@@ -1,23 +1,38 @@
+'use client'
+import { useEffect, useState } from 'react'
+
 import Link from 'next/link'
 
-import { User } from 'lucide-react'
+import { MenuIcon, User } from 'lucide-react'
 
 import { Button } from '~/components/ui/button'
-import { useAppStore } from '~/hooks/useAppStore'
+import { useAppStore, useHydratedStore } from '~/hooks/useAppStore'
 import { cn } from '~/lib/utils'
 
+import { MyLoader } from '../ui/myloader'
+
 export function Sidebar({ className }: React.HTMLAttributes<HTMLDivElement>) {
-  const user = useAppStore((state) => state.user)
+  const user = useHydratedStore('user')
+  const setEntityOpened = useAppStore((state) => state.setEntityOpened)
+
+  const isAdmin = !Boolean(user?.parent)
 
   return (
-    <div className={cn('max-w-[250px] border-r-2', className)}>
+    <div className={cn('relative z-10 max-w-[250px] border-r-2', className)}>
       <div className='space-y-4 py-4'>
         <div className='px-4 py-2'>
-          <h2 className='mb-2 px-2 text-lg font-semibold tracking-tight'>
+          <h2 className='mb-2 flex w-full items-center justify-between gap-2 px-2 text-lg font-semibold tracking-tight'>
             Knowledge
+            <MenuIcon
+              className='cursor-pointer'
+              onClick={() => {
+                setEntityOpened(true)
+              }}
+            />
           </h2>
+
           <div className='space-y-1'>
-            {user && !user.parent && (
+            {isAdmin && (
               <>
                 <Button
                   variant='ghost'

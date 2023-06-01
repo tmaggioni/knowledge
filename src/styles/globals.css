@@ -73,9 +73,10 @@
 @layer base {
   * {
     @apply border-border;
+    @apply text-white;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-primary text-foreground;
     font-feature-settings: 'rlig' 1, 'calt' 1;
   }
 }

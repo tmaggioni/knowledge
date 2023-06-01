@@ -1,19 +1,17 @@
-import { useRouter } from 'next/router'
-
-import { zodResolver } from '@hookform/resolvers/zod'
 import { type Entity } from '@prisma/client'
 import { type ColumnDef } from '@tanstack/react-table'
-import { DeleteIcon, Edit, Loader } from 'lucide-react'
+import { Loader, Trash2 } from 'lucide-react'
 import { toast } from 'react-toastify'
 
 import Layout from '~/components/layout/layout'
+import { DialogEditEntity } from '~/components/pages/entity/dialogEdit'
 import { Breadcrumb } from '~/components/ui/breadcrumb'
 import { Button } from '~/components/ui/button'
 import { DataTable } from '~/components/ui/data-table'
+import { MyDeleteIcon } from '~/components/ui/mydeleteIcon'
 import { api } from '~/utils/api'
 
-import { DialogCreateEntity } from './dialogCreate'
-import { DialogEditEntity } from './dialogEdit'
+import DialogCreateEntity from '../../../components/pages/entity/dialogCreate'
 
 const Users = () => {
   const { data: entities, isLoading, isFetching } = api.entity.getAll.useQuery()
@@ -64,7 +62,7 @@ const Users = () => {
               className='h-8 w-8 p-0'
               onClick={() => handleRemoveEntity(entity.id)}
             >
-              <DeleteIcon size={20} color={'hsl(var(--destructive))'} />
+              <MyDeleteIcon size={20} color={'hsl(var(--destructive))'} />
             </Button>
           </div>
         )

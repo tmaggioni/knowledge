@@ -2,7 +2,6 @@ import Head from 'next/head'
 import { useRouter } from 'next/navigation'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { z } from 'zod'
@@ -16,6 +15,7 @@ import {
   FormMessage,
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
+import { MyLoader } from '~/components/ui/myloader'
 import { useAppStore } from '~/hooks/useAppStore'
 
 import { api } from '../../utils/api'
@@ -40,6 +40,7 @@ const Login = () => {
     resolver: zodResolver(validationSchema),
     defaultValues: {
       email: '',
+      password: '',
     },
   })
 
@@ -106,7 +107,7 @@ const Login = () => {
               />
 
               <Button type='submit'>
-                {isLoading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+                {isLoading && <MyLoader />}
                 Entrar
               </Button>
             </form>

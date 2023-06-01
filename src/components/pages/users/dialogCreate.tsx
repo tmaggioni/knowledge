@@ -1,7 +1,6 @@
 import { useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { z } from 'zod'
@@ -21,6 +20,7 @@ import {
   FormMessage,
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
+import { MyLoader } from '~/components/ui/myloader'
 import { api } from '~/utils/api'
 
 const validationSchema = z
@@ -128,7 +128,7 @@ const FormCreateUser = ({ onSuccess }: Props) => {
         />
 
         <Button type='submit' disabled={isLoading}>
-          {isLoading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+          {isLoading && <MyLoader />}
           Salvar
         </Button>
       </form>

@@ -1,17 +1,16 @@
 import { type User } from '@prisma/client'
 import { type ColumnDef } from '@tanstack/react-table'
 import { Loader } from 'lucide-react'
-import { Trash2 } from 'lucide-react'
 import { toast } from 'react-toastify'
 
 import Layout from '~/components/layout/layout'
+import { DialogCreateUser } from '~/components/pages/users/dialogCreate'
+import { DialogPermissions } from '~/components/pages/users/dialogPermissions'
 import { Breadcrumb } from '~/components/ui/breadcrumb'
 import { Button } from '~/components/ui/button'
 import { DataTable } from '~/components/ui/data-table'
+import { MyDeleteIcon } from '~/components/ui/mydeleteIcon'
 import { api } from '~/utils/api'
-
-import { DialogCreateUser } from './dialogCreate'
-import { DialogPermissions } from './dialogPermissions'
 
 const Users = () => {
   const { data: users, isLoading, isFetching } = api.user.getAll.useQuery()
@@ -58,7 +57,7 @@ const Users = () => {
               className='h-8 w-8 p-0'
               onClick={() => handleRemoveUser(user.id)}
             >
-              <Trash2 size={20} color={'hsl(var(--destructive))'} />
+              <MyDeleteIcon size={20} color={'hsl(var(--destructive))'} />
             </Button>
           </div>
         )

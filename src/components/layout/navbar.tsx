@@ -16,7 +16,7 @@ export const Navbar = () => {
   useOnClickOutside(ref, () => setOpen(false))
   const { mutate: logout } = api.auth.logout.useMutation()
   return (
-    <nav className='bg-gray-800'>
+    <nav className='bg-primary'>
       <div className='mx-auto  w-full px-2 sm:px-6 lg:px-8'>
         <div className='relative flex h-16 w-full items-center justify-between'>
           <div className='absolute right-0 flex items-center pr-2'>

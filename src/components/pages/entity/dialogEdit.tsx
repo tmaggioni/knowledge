@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Edit, Loader2 } from 'lucide-react'
+import { Edit } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { z } from 'zod'
@@ -21,6 +21,7 @@ import {
   FormMessage,
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
+import { MyLoader } from '~/components/ui/myloader'
 import { Textarea } from '~/components/ui/textarea'
 import { api } from '~/utils/api'
 
@@ -78,7 +79,7 @@ const FormEditEntity = ({ onSuccess, entityId }: PropsFormEntity) => {
   }
 
   if (isLoading) {
-    return <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+    return <MyLoader />
   }
   return (
     <Form {...form}>
@@ -112,7 +113,7 @@ const FormEditEntity = ({ onSuccess, entityId }: PropsFormEntity) => {
         />
 
         <Button type='submit' disabled={isLoadingEdit}>
-          {isLoadingEdit && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+          {isLoadingEdit && <MyLoader />}
           Editar
         </Button>
       </form>
