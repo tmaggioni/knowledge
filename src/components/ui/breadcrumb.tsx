@@ -11,7 +11,7 @@ interface Props {
 export const Breadcrumb = ({ links }: Props) => {
   return (
     <nav
-      className='relative mb-3 flex w-full flex-wrap items-center justify-between bg-primary py-3 text-neutral-500 shadow-md hover:text-neutral-700 focus:text-neutral-700 dark:bg-neutral-600 lg:flex-wrap lg:justify-start'
+      className='relative mb-3 flex w-full flex-wrap items-center justify-between py-3 text-neutral-500 shadow-md hover:text-neutral-700 focus:text-neutral-700 dark:bg-neutral-600 lg:flex-wrap lg:justify-start'
       data-te-navbar-ref
     >
       <div className='flex w-full flex-wrap items-center justify-between px-3'>

@@ -12,7 +12,9 @@ import { MyLoader } from '../ui/myloader'
 export function EntityBar({ className }: React.HTMLAttributes<HTMLDivElement>) {
   const user = useHydratedStore('user')
   const entityOpened = useHydratedStore('entityOpened')
+  const entitiesSelected = useHydratedStore('entitiesSelected')
   const setEntityOpened = useAppStore((state) => state.setEntityOpened)
+  const setEntitiesSelected = useAppStore((state) => state.setEntitiesSelected)
 
   const isAdmin = !Boolean(user?.parent)
 
@@ -28,34 +30,55 @@ export function EntityBar({ className }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(
-        `box-borderborder-r-2 absolute top-0 z-20 h-screen w-full max-w-[230px]  bg-white ${
+        `absolute z-10 w-full max-w-[230px] border-r-2 bg-background ${
           entityOpened ? 'left-0' : '-left-[100%]'
-        } transition-all duration-300`,
+        } top-0 z-20 h-screen transition-all duration-300`,
         className,
       )}
     >
-      <div className='flex w-full flex-col items-end '>
-        <div className='pr-4 pt-4'>
-          <CopyX
-            className='mb-5 cursor-pointer'
-            onClick={() => {
-              setEntityOpened(false)
-            }}
-          />
+      <div className=' space-y-4 py-4'>
+        <div className='flex flex-col gap-1 px-4 py-2'>
+          <h2 className='mb-5 flex w-full items-center justify-between gap-2 px-2 text-lg font-semibold tracking-tight'>
+            Entidades
+            <CopyX
+              className='cursor-pointer'
+              onClick={() => {
+                setEntityOpened(false)
+              }}
+            />
+          </h2>
+
+          {isAdmin &&
+            entities?.entitiesParent?.map((item) => (
+              <Button
+                key={item.id}
+                variant={
+                  entitiesSelected.includes(item.id) ? 'default' : 'ghost'
+                }
+                size='sm'
+                onClick={() => setEntitiesSelected(item.id)}
+                className='w-full justify-start'
+              >
+                <User className='mr-2 h-4 w-4' />
+                {item.name}
+              </Button>
+            ))}
+          {!isAdmin &&
+            entities?.entitiesUsers?.map((item) => (
+              <Button
+                variant={
+                  entitiesSelected.includes(item.entity.id)
+                    ? 'default'
+                    : 'ghost'
+                }
+                size='sm'
+                onClick={() => setEntitiesSelected(item.entity.id)}
+                key={item.entity.id}
+              >
+                {item.entity.name}
+              </Button>
+            ))}
         </div>
-        {isAdmin &&
-          entities?.entitiesParent?.map((item) => (
-            <div
-              className='flex h-14 w-full cursor-pointer items-center justify-center bg-[#ccc] transition-all'
-              key={item.id}
-            >
-              {item.name}
-            </div>
-          ))}
-        {!isAdmin &&
-          entities?.entitiesUsers?.map((item) => (
-            <Button key={item.entity.id}>{item.entity.name}</Button>
-          ))}
       </div>
     </div>
   )

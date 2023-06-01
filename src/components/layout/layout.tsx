@@ -1,7 +1,6 @@
 import { type ReactNode } from 'react'
 
 import { EntityBar } from './entitybar'
-import Footer from './footer'
 import { Navbar } from './navbar'
 import { Sidebar } from './sidebar'
 

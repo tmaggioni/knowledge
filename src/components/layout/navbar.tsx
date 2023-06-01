@@ -1,10 +1,10 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { useRouter } from 'next/router'
 
-import { User } from 'lucide-react'
+import { MoonStar, User } from 'lucide-react'
 
-import { useAppStore } from '~/hooks/useAppStore'
+import { useAppStore, useHydratedStore } from '~/hooks/useAppStore'
 import { useOnClickOutside } from '~/hooks/useClickOutside'
 import { api } from '~/utils/api'
 
@@ -13,26 +13,45 @@ export const Navbar = () => {
   const ref = useRef(null)
   const router = useRouter()
   const setUser = useAppStore((state) => state.setUser)
+  const setDarkOn = useAppStore((state) => state.setDarkOn)
+  const darkOn = useHydratedStore('darkOn')
+
   useOnClickOutside(ref, () => setOpen(false))
   const { mutate: logout } = api.auth.logout.useMutation()
+
+  useEffect(() => {
+    if (darkOn) {
+      document?.querySelector('html')?.classList?.add('dark')
+    } else {
+      document?.querySelector('html')?.classList?.remove('dark')
+    }
+  }, [darkOn])
   return (
-    <nav className='bg-primary'>
-      <div className='mx-auto  w-full px-2 sm:px-6 lg:px-8'>
+    <nav className='bg-background'>
+      <div className='mx-auto box-border w-full px-2 sm:px-6 lg:px-8'>
         <div className='relative flex h-16 w-full items-center justify-between'>
           <div className='absolute right-0 flex items-center pr-2'>
-            <div className='relative ml-3'>
-              <div>
-                <button
-                  type='button'
-                  className='flex rounded-full bg-slate-400 p-1 text-sm '
-                  id='user-menu-button'
-                  aria-expanded='false'
-                  aria-haspopup='true'
-                  onClick={() => setOpen(!open)}
-                >
-                  <User color='#FFF' />
-                </button>
-              </div>
+            <div className='relative ml-3 flex items-center gap-1'>
+              <button
+                type='button'
+                className='flex rounded-full bg-slate-400 p-1 text-sm '
+                id='user-menu-button'
+                aria-expanded='false'
+                aria-haspopup='true'
+                onClick={() => setDarkOn(!darkOn)}
+              >
+                <MoonStar />
+              </button>
+              <button
+                type='button'
+                className='flex rounded-full bg-slate-400 p-1 text-sm '
+                id='user-menu-button'
+                aria-expanded='false'
+                aria-haspopup='true'
+                onClick={() => setOpen(!open)}
+              >
+                <User color='#FFF' />
+              </button>
 
               <div
                 ref={ref}

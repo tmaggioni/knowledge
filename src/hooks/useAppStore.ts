@@ -15,24 +15,39 @@ type GetFunctionKeys<T> = {
 type OmittedFunctionKeys<T> = Omit<T, GetFunctionKeys<T>>
 
 type AppStoreState = {
+  darkOn: boolean
+  setDarkOn: (themeMode: boolean) => void
   entityOpened: boolean
   setEntityOpened: (entityOpened: boolean) => void
   user: UserSession | null
   setUser: (user: UserSession | null) => void
+  entitiesSelected: string[]
+  setEntitiesSelected: (entityId: string) => void
 }
 
 const initialStates = {
   entityOpened: false,
+  darkOn: false,
   user: null,
+  entitiesSelected: [],
 }
 
 export const useAppStore = create<AppStoreState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
+      darkOn: false,
+      setDarkOn: (darkOn) => set({ darkOn }),
       entityOpened: initialStates.entityOpened,
       setEntityOpened: (entityOpened) => set({ entityOpened }),
       user: initialStates.user,
       setUser: (user) => set({ user }),
+      entitiesSelected: [],
+      setEntitiesSelected: (entityId) =>
+        set({
+          entitiesSelected: get().entitiesSelected.includes(entityId)
+            ? get().entitiesSelected.filter((item) => item !== entityId)
+            : [...get().entitiesSelected, entityId],
+        }),
     }),
     {
       name: 'user-storage',
