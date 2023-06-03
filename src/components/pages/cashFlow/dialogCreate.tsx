@@ -2,7 +2,13 @@ import { useMemo, useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
-import { CalendarIcon, Check, ChevronsUpDown } from 'lucide-react'
+import {
+  AlertTriangle,
+  CalendarIcon,
+  Check,
+  ChevronsUpDown,
+  Plus,
+} from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { NumericFormat } from 'react-number-format'
 import { toast } from 'react-toastify'
@@ -48,6 +54,12 @@ import {
 } from '~/components/ui/select'
 import { Switch } from '~/components/ui/switch'
 import { Textarea } from '~/components/ui/textarea'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '~/components/ui/tooltip'
 import { useHydratedStore } from '~/hooks/useAppStore'
 import { cn } from '~/lib/utils'
 import { api } from '~/utils/api'
@@ -59,13 +71,13 @@ type NumberFormatValues = {
 }
 
 const validationSchema = z.object({
-  name: z.string().min(1, { message: 'Obrigatório' }),
+  name: z.string(),
   description: z.string().optional(),
-  type: z.string().min(1, { message: 'Obrigatório' }),
-  typeFlow: z.string().min(1, { message: 'Obrigatório' }),
+  type: z.string(),
+  typeFlow: z.string(),
   status: z.boolean().default(false).optional(),
-  categoryId: z.string().min(1, { message: 'Obrigatório' }),
-  amount: z.number().min(1, { message: 'Obrigatório' }),
+  categoryId: z.string(),
+  amount: z.number().min(1, 'Valor é campo obrigatório'),
   date: z.date(),
 })
 
@@ -79,8 +91,19 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
   const [open, setOpen] = useState(false)
 
   const entitiesSelected = useHydratedStore('entitiesSelected')
+
   const form = useForm<ValidationSchema>({
     resolver: zodResolver(validationSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+      type: '',
+      amount: 0,
+      categoryId: undefined,
+      status: false,
+      typeFlow: 'income',
+      date: new Date(),
+    },
   })
 
   const { mutate: create, isLoading } = api.cashFlow.create.useMutation()
@@ -130,11 +153,11 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className='flex flex-col space-y-2'
+        className='flex flex-col gap-2 scroll-auto'
       >
         <FormField
           control={form.control}
-          name='type'
+          name='typeFlow'
           render={({ field }) => (
             <FormItem className='m-3'>
               <FormControl>
@@ -145,13 +168,13 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
                 >
                   <FormItem className='flex items-center space-x-3 space-y-0'>
                     <FormControl>
-                      <RadioGroupItem value='all' />
+                      <RadioGroupItem value='income' />
                     </FormControl>
                     <FormLabel className='font-normal'>Receita</FormLabel>
                   </FormItem>
                   <FormItem className='flex items-center space-x-3 space-y-0'>
                     <FormControl>
-                      <RadioGroupItem value='mentions' />
+                      <RadioGroupItem value='expense' />
                     </FormControl>
                     <FormLabel className='font-normal'>Despesa</FormLabel>
                   </FormItem>
@@ -161,11 +184,13 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name='name'
           render={({ field }) => (
             <FormItem>
+              <FormLabel>Nome</FormLabel>
               <FormControl>
                 <Input placeholder='Nome' {...field} />
               </FormControl>
@@ -173,23 +198,13 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name='description'
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Textarea placeholder='Descrição' {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
         <FormField
           control={form.control}
           name='categoryId'
           render={({ field }) => (
             <FormItem className='flex flex-col'>
+              <FormLabel>Categoria</FormLabel>
               <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -260,6 +275,7 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
           name='type'
           render={({ field }) => (
             <FormItem>
+              <FormLabel>Forma da pagamento</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
@@ -275,29 +291,13 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name='status'
-          render={({ field }) => (
-            <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
-              <div className='space-y-0.5'>
-                <FormLabel className='text-base'>Status</FormLabel>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
 
         <FormField
           control={form.control}
           name='amount'
           render={({ field }) => (
             <FormItem>
+              <FormLabel>Valor</FormLabel>
               <FormControl>
                 <NumericFormat
                   thousandSeparator='.'
@@ -320,7 +320,7 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
           name='date'
           render={({ field }) => (
             <FormItem className='flex flex-col'>
-              <FormLabel>Date of birth</FormLabel>
+              <FormLabel>Data vencimento</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -332,9 +332,9 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
                       )}
                     >
                       {field.value ? (
-                        format(field.value, 'PPP')
+                        format(field.value, 'dd/MM/yyyy')
                       ) : (
-                        <span>Pick a date</span>
+                        <span>Seleciona a data</span>
                       )}
                       <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
                     </Button>
@@ -345,9 +345,7 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
                     mode='single'
                     selected={field.value}
                     onSelect={field.onChange}
-                    disabled={(date) =>
-                      date > new Date() || date < new Date('1900-01-01')
-                    }
+                    disabled={(date) => date < new Date('1900-01-01')}
                     initialFocus
                   />
                 </PopoverContent>
@@ -358,10 +356,46 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
           )}
         />
 
-        <Button type='submit' disabled={isLoading}>
-          {isLoading && <MyLoader />}
-          Salvar
-        </Button>
+        <FormField
+          control={form.control}
+          name='description'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descrição</FormLabel>
+              <FormControl>
+                <Textarea placeholder='Descrição' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name='status'
+          render={({ field }) => (
+            <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
+              <div className='space-y-0.5'>
+                <FormLabel className='text-base'>
+                  {field.value ? 'Pago' : 'Não Pago'}
+                </FormLabel>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <div className='col-span-2'>
+          <Button type='submit' disabled={isLoading}>
+            {isLoading && <MyLoader />}
+            Salvar
+          </Button>
+        </div>
       </form>
     </Form>
   )
@@ -372,16 +406,33 @@ export default function DialogCreateCashFlow() {
   const entitiesSelected = useHydratedStore('entitiesSelected')
 
   return (
-    <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-      <Button
-        variant='default'
-        onClick={() => setModalOpen(true)}
-        disabled={entitiesSelected.length === 0 || entitiesSelected.length > 1}
-      >
-        Novo cadastro
-      </Button>
+    <Dialog open={modalOpen} onOpenChange={setModalOpen} modal>
+      <div className='flex items-center gap-2'>
+        <Button
+          variant='default'
+          onClick={() => setModalOpen(true)}
+          disabled={
+            entitiesSelected.length === 0 || entitiesSelected.length > 1
+          }
+        >
+          Novo cadastro
+        </Button>
 
-      <DialogContent className='sm:max-w-[425px]'>
+        {(entitiesSelected.length === 0 || entitiesSelected.length > 1) && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <AlertTriangle className='cursor-pointer' />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Para cadastrar precisa selecionar apenas uma entidade</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+      </div>
+
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Adicionar</DialogTitle>
         </DialogHeader>

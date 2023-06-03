@@ -50,6 +50,7 @@ const FormCreateEntity = ({ onSuccess }: Props) => {
         onSuccess: (data) => {
           toast(`Entidade ${data.name} adicionada com sucesso`)
           void utils.entity.getAll.invalidate()
+          void utils.entity.getAllByUser.invalidate()
           onSuccess()
         },
         onError: (err) => {

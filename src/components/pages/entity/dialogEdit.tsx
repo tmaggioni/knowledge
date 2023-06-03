@@ -67,6 +67,7 @@ const FormEditEntity = ({ onSuccess, entityId }: PropsFormEntity) => {
             type: 'success',
           })
           void utils.entity.getAll.invalidate()
+          void utils.entity.getAllByUser.invalidate()
           onSuccess()
         },
         onError: (err) => {

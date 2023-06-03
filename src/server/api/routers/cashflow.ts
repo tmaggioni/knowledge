@@ -31,6 +31,8 @@ export const cashFlowRouter = createTRPCRouter({
         typeFlow,
       } = input
 
+      const parent = ctx.parent || ctx.userId
+
       const cashFlow = await ctx.prisma.cashFlow.create({
         data: {
           name,
@@ -42,6 +44,7 @@ export const cashFlowRouter = createTRPCRouter({
           date,
           amount,
           typeFlow,
+          parentId: parent as string,
         },
       })
 
@@ -65,6 +68,7 @@ export const cashFlowRouter = createTRPCRouter({
         entityId: z.string(),
         categoryId: z.string(),
         date: z.date(),
+        amount: z.number(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -78,6 +82,7 @@ export const cashFlowRouter = createTRPCRouter({
         status,
         date,
         typeFlow,
+        amount,
       } = input
 
       const cashFlow = await ctx.prisma.cashFlow.update({
@@ -93,6 +98,7 @@ export const cashFlowRouter = createTRPCRouter({
           entityId,
           date,
           typeFlow,
+          amount,
         },
       })
 
@@ -107,16 +113,25 @@ export const cashFlowRouter = createTRPCRouter({
   getAll: privateProcedure
     .input(
       z.object({
-        entityId: z.string(),
+        entityIds: z.array(z.string()),
         pageIndex: z.number(),
         pageSize: z.number(),
       }),
     )
     .query(async ({ input, ctx }) => {
-      const { entityId } = input
+      const { entityIds } = input
+      const parent = ctx.parent || ctx.userId
       const [cashFlow, total] = await ctx.prisma.$transaction([
         ctx.prisma.cashFlow.findMany({
-          where: { entityId },
+          where: {
+            entityId: {
+              in: entityIds,
+            },
+            parentId: parent as string,
+          },
+          include: {
+            category: { select: { name: true } },
+          },
           skip: input.pageIndex,
           take: input.pageSize,
         }),

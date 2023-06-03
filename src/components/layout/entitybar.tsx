@@ -56,7 +56,12 @@ export function EntityBar({ className }: React.HTMLAttributes<HTMLDivElement>) {
                   entitiesSelected.includes(item.id) ? 'default' : 'ghost'
                 }
                 size='sm'
-                onClick={() => setEntitiesSelected(item.id)}
+                onClick={() => {
+                  const entities = entitiesSelected.includes(item.id)
+                    ? entitiesSelected.filter((entity) => entity !== item.id)
+                    : [...entitiesSelected, item.id]
+                  setEntitiesSelected(entities)
+                }}
                 className='w-full justify-start'
               >
                 <User className='mr-2 h-4 w-4' />
@@ -72,7 +77,14 @@ export function EntityBar({ className }: React.HTMLAttributes<HTMLDivElement>) {
                     : 'ghost'
                 }
                 size='sm'
-                onClick={() => setEntitiesSelected(item.entity.id)}
+                onClick={() => {
+                  const entities = entitiesSelected.includes(item.entity.id)
+                    ? entitiesSelected.filter(
+                        (entity) => entity !== item.entity.id,
+                      )
+                    : [...entitiesSelected, item.entity.id]
+                  setEntitiesSelected(entities)
+                }}
                 key={item.entity.id}
               >
                 {item.entity.name}

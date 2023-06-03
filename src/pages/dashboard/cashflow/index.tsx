@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 
 import { type CashFlow } from '@prisma/client'
 import { type ColumnDef, type PaginationState } from '@tanstack/react-table'
+import { format } from 'date-fns'
 import { Loader } from 'lucide-react'
 import { toast } from 'react-toastify'
 
@@ -35,7 +36,7 @@ const CashFlow = () => {
     isLoading,
     isFetching,
   } = api.cashFlow.getAll.useQuery({
-    entityId: entitiesSelected[0] || '',
+    entityIds: entitiesSelected || [],
     pageIndex,
     pageSize,
   })
@@ -62,7 +63,13 @@ const CashFlow = () => {
     )
   }
 
-  const columns: ColumnDef<CashFlow>[] = [
+  const columns: ColumnDef<
+    CashFlow & {
+      category: {
+        name: string
+      }
+    }
+  >[] = [
     {
       accessorKey: 'name',
       header: 'Nome',
@@ -70,6 +77,42 @@ const CashFlow = () => {
     {
       accessorKey: 'description',
       header: 'Descrição',
+    },
+    {
+      accessorKey: 'type',
+      header: 'Tipo pagamento',
+    },
+    {
+      accessorKey: 'category',
+      header: 'Categoria',
+      cell: ({ row }) => {
+        const cashFlow = row.original
+
+        return <>{cashFlow.category.name}</>
+      },
+    },
+    {
+      accessorKey: 'typeFlow',
+      header: 'Receita/Despesa',
+      cell: ({ row }) => {
+        const cashFlow = row.original
+
+        return (
+          <>
+            {cashFlow.typeFlow === 'income' && 'Receita'}
+            {cashFlow.typeFlow === 'expense' && 'Despesa'}
+          </>
+        )
+      },
+    },
+    {
+      accessorKey: 'date',
+      header: 'Data',
+      cell: ({ row }) => {
+        const cashFlow = row.original
+
+        return <>{format(cashFlow.date, 'dd/MM/yyyy')}</>
+      },
     },
     {
       accessorKey: 'actions',

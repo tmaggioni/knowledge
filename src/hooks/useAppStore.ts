@@ -22,7 +22,7 @@ type AppStoreState = {
   user: UserSession | null
   setUser: (user: UserSession | null) => void
   entitiesSelected: string[]
-  setEntitiesSelected: (entityId: string) => void
+  setEntitiesSelected: (entitiesSelected: string[]) => void
 }
 
 const initialStates = {
@@ -34,7 +34,7 @@ const initialStates = {
 
 export const useAppStore = create<AppStoreState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       darkOn: false,
       setDarkOn: (darkOn) => set({ darkOn }),
       entityOpened: initialStates.entityOpened,
@@ -42,11 +42,9 @@ export const useAppStore = create<AppStoreState>()(
       user: initialStates.user,
       setUser: (user) => set({ user }),
       entitiesSelected: [],
-      setEntitiesSelected: (entityId) =>
+      setEntitiesSelected: (entitiesSelected) =>
         set({
-          entitiesSelected: get().entitiesSelected.includes(entityId)
-            ? get().entitiesSelected.filter((item) => item !== entityId)
-            : [...get().entitiesSelected, entityId],
+          entitiesSelected,
         }),
     }),
     {
