@@ -1,33 +1,51 @@
-import { type Entity } from '@prisma/client'
-import { type ColumnDef } from '@tanstack/react-table'
-import { Loader, Trash2 } from 'lucide-react'
+import { useMemo, useState } from 'react'
+
+import { type Category } from '@prisma/client'
+import { type ColumnDef, type PaginationState } from '@tanstack/react-table'
+import { Loader } from 'lucide-react'
 import { toast } from 'react-toastify'
 
 import Layout from '~/components/layout/layout'
-import { DialogEditEntity } from '~/components/pages/entity/dialogEdit'
+import DialogCreateCategory from '~/components/pages/categories/dialogCreate'
+import { DialogEditCategory } from '~/components/pages/categories/dialogEdit'
 import { Breadcrumb } from '~/components/ui/breadcrumb'
 import { Button } from '~/components/ui/button'
 import { DataTable } from '~/components/ui/data-table'
 import { MyDeleteIcon } from '~/components/ui/mydeleteIcon'
 import { api } from '~/utils/api'
 
-import DialogCreateEntity from '../../../components/pages/entity/dialogCreate'
+const Category = () => {
+  const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  })
 
-const Entity = () => {
-  const { data: entities, isLoading, isFetching } = api.entity.getAll.useQuery()
-  const { mutate: removeEntity, isLoading: isLoadingRemove } =
-    api.entity.remove.useMutation()
+  const pagination = useMemo(
+    () => ({
+      pageIndex,
+      pageSize,
+    }),
+    [pageIndex, pageSize],
+  )
+
+  const {
+    data: categorieResponse,
+    isLoading,
+    isFetching,
+  } = api.category.getAll.useQuery({ pageIndex, pageSize })
+  const { mutate: removeCategory, isLoading: isLoadingRemove } =
+    api.category.remove.useMutation()
   const utils = api.useContext()
 
-  const handleRemoveEntity = (id: string) => {
-    removeEntity(
+  const handleRemoveCategory = (id: string) => {
+    removeCategory(
       { id },
       {
         onSuccess: (data) => {
           toast(`Entidade ${data.name} removida com sucesso`, {
             type: 'success',
           })
-          void utils.entity.getAll.invalidate()
+          void utils.category.getAll.invalidate()
         },
         onError: (err) => {
           toast(err.message, {
@@ -38,7 +56,7 @@ const Entity = () => {
     )
   }
 
-  const columns: ColumnDef<Entity>[] = [
+  const columns: ColumnDef<Category>[] = [
     {
       accessorKey: 'name',
       header: 'Nome',
@@ -51,16 +69,16 @@ const Entity = () => {
       accessorKey: 'actions',
       header: () => <div className='text-right'>{'Editar/Deletar'}</div>,
       cell: ({ row }) => {
-        const entity = row.original
+        const category = row.original
 
         return (
           <div className='text-right'>
-            <DialogEditEntity entityId={entity.id} />
+            <DialogEditCategory categoryId={category.id} />
             <Button
               disabled={isLoadingRemove}
               variant='ghost'
               className='h-8 w-8 p-0'
-              onClick={() => handleRemoveEntity(entity.id)}
+              onClick={() => handleRemoveCategory(category.id)}
             >
               <MyDeleteIcon size={20} color={'hsl(var(--destructive))'} />
             </Button>
@@ -76,19 +94,32 @@ const Entity = () => {
         <Breadcrumb
           links={[
             { label: 'Dashboard', link: '/dashboard' },
-            { label: 'Entidades' },
+            { label: 'Categorias' },
           ]}
         />
         <div className='flex max-w-[50%] flex-col items-start gap-2'>
           <div className='flex items-center gap-2'>
-            <DialogCreateEntity />
+            <DialogCreateCategory />
             {(isLoading || isFetching) && (
               <Loader className='mr-2 h-4 w-4 animate-spin' />
             )}
           </div>
 
           {!isLoading && (
-            <DataTable columns={columns} data={entities ? entities : []} />
+            <>
+              <DataTable
+                columns={columns}
+                data={
+                  categorieResponse?.categories
+                    ? categorieResponse.categories
+                    : []
+                }
+                pagination={pagination}
+                hasPagination={true}
+                setPagination={setPagination}
+                total={categorieResponse?.total}
+              />
+            </>
           )}
         </div>
       </>
@@ -96,4 +127,4 @@ const Entity = () => {
   )
 }
 
-export default Entity
+export default Category

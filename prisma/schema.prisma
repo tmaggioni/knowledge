@@ -17,7 +17,7 @@ model User {
   parent    String
   entities  Entity[]
   entitiesUsers UsersEntity[]
-  
+  categories Category[]
 }
 
 model Entity {
@@ -29,6 +29,7 @@ model Entity {
   parent      User              @relation(fields: [parentId], references: [id]) 
   parentId    String
   users       UsersEntity[]
+  cashflow CashFlow[]
   @@index([parentId])
 }
 
@@ -36,9 +37,42 @@ model UsersEntity {
   userId       String
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   entityId    String
-  entity       Entity @relation(fields: [entityId], references: [id])
+  entity       Entity @relation(fields: [entityId], references: [id] , onDelete: Cascade)
   
   @@id([userId, entityId])
   @@index([userId])
   @@index([entityId])
+}
+
+model Category {
+  id          String            @id @default(cuid())
+  name        String            @unique
+  description String
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  parent      User              @relation(fields: [parentId], references: [id]) 
+  parentId    String
+  cashFlow    CashFlow[]
+  @@index([parentId])
+}
+
+
+model CashFlow{
+  id  String  @id @default(cuid())
+  name String
+  description String
+  type        String
+  status      Boolean
+  date        DateTime          
+  amount      Decimal   
+  typeFlow    String
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  entity      Entity            @relation(fields: [entityId], references: [id]) 
+  entityId    String
+  category      Category        @relation(fields: [categoryId], references: [id]) 
+  categoryId    String
+
+  @@index([entityId])
+  @@index([categoryId])
 }

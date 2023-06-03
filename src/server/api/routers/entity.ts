@@ -105,19 +105,26 @@ export const entityRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { id } = input
 
-      const deleted = await ctx.prisma.entity.delete({
-        where: {
-          id: id,
-        },
-      })
+      try {
+        const deleted = await ctx.prisma.entity.delete({
+          where: {
+            id: id,
+          },
+        })
 
-      if (!deleted) {
+        if (!deleted) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Problema ao excluir a entidade',
+          })
+        }
+
+        return deleted
+      } catch (err) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: 'Problema ao excluir a entidade',
+          message: 'Esse registro já deve estar associado ',
         })
       }
-
-      return deleted
     }),
 })

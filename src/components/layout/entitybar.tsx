@@ -30,9 +30,9 @@ export function EntityBar({ className }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(
-        `absolute z-10 w-full max-w-[230px] border-r-2 bg-background ${
+        `absolute z-10 h-auto w-full max-w-[230px]  bg-background ${
           entityOpened ? 'left-0' : '-left-[100%]'
-        } top-0 z-20 h-screen transition-all duration-300`,
+        } top-[12px] z-20 h-screen transition-all duration-300`,
         className,
       )}
     >

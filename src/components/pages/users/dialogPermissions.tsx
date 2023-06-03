@@ -22,9 +22,7 @@ import {
   FormLabel,
   FormMessage,
 } from '~/components/ui/form'
-import { Input } from '~/components/ui/input'
 import { MyLoader } from '~/components/ui/myloader'
-import { Textarea } from '~/components/ui/textarea'
 import { api } from '~/utils/api'
 
 const validationSchema = z.object({
