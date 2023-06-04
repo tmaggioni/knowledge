@@ -44,7 +44,7 @@ const FormEditCategory = ({ onSuccess, categoryId }: PropsFormEntity) => {
   const form = useForm<ValidationSchema>({
     resolver: zodResolver(validationSchema),
 
-    values: {
+    defaultValues: {
       name: category?.name || '',
       description: category?.description,
     },

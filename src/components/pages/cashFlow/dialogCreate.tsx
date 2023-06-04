@@ -1,14 +1,9 @@
 import { useMemo, useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { StatusFlow, TypeFlow, TypePayment } from '@prisma/client'
 import { format } from 'date-fns'
-import {
-  AlertTriangle,
-  CalendarIcon,
-  Check,
-  ChevronsUpDown,
-  Plus,
-} from 'lucide-react'
+import { CalendarIcon, Check, ChevronsUpDown } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { NumericFormat } from 'react-number-format'
 import { toast } from 'react-toastify'
@@ -54,12 +49,6 @@ import {
 } from '~/components/ui/select'
 import { Switch } from '~/components/ui/switch'
 import { Textarea } from '~/components/ui/textarea'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '~/components/ui/tooltip'
 import { useHydratedStore } from '~/hooks/useAppStore'
 import { cn } from '~/lib/utils'
 import { api } from '~/utils/api'
@@ -75,7 +64,7 @@ const validationSchema = z.object({
   description: z.string().optional(),
   type: z.string(),
   typeFlow: z.string(),
-  status: z.boolean().default(false).optional(),
+  status: z.string(),
   categoryId: z.string(),
   amount: z.number().min(1, 'Valor é campo obrigatório'),
   date: z.date(),
@@ -97,11 +86,11 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
     defaultValues: {
       name: '',
       description: '',
-      type: '',
+      type: TypePayment.TRANSFER,
       amount: 0,
       categoryId: undefined,
-      status: false,
-      typeFlow: 'income',
+      status: StatusFlow.NOT_PAYDED,
+      typeFlow: TypeFlow.EXPENSE,
       date: new Date(),
     },
   })
@@ -130,7 +119,7 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
         categoryId: values.categoryId,
         date: values.date,
         entityId: entitiesSelected[0]!,
-        status: values.status || false,
+        status: values.status,
         type: values.type,
         amount: values.amount,
         typeFlow: values.typeFlow,
@@ -168,13 +157,13 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
                 >
                   <FormItem className='flex items-center space-x-3 space-y-0'>
                     <FormControl>
-                      <RadioGroupItem value='income' />
+                      <RadioGroupItem value={TypeFlow.INCOME} />
                     </FormControl>
                     <FormLabel className='font-normal'>Receita</FormLabel>
                   </FormItem>
                   <FormItem className='flex items-center space-x-3 space-y-0'>
                     <FormControl>
-                      <RadioGroupItem value='expense' />
+                      <RadioGroupItem value={TypeFlow.EXPENSE} />
                     </FormControl>
                     <FormLabel className='font-normal'>Despesa</FormLabel>
                   </FormItem>
@@ -283,8 +272,10 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value='Boleto'>Boleto</SelectItem>
-                  <SelectItem value='Transferência'>Transferência</SelectItem>
+                  <SelectItem value={TypePayment.TICKET}>Boleto</SelectItem>
+                  <SelectItem value={TypePayment.TRANSFER}>
+                    Transferência
+                  </SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -377,13 +368,19 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
             <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
               <div className='space-y-0.5'>
                 <FormLabel className='text-base'>
-                  {field.value ? 'Pago' : 'Não Pago'}
+                  {field.value === StatusFlow.PAYED ? 'Pago' : 'Não Pago'}
                 </FormLabel>
               </div>
               <FormControl>
                 <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
+                  checked={field.value === StatusFlow.PAYED}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      field.onChange(StatusFlow.PAYED)
+                    } else {
+                      field.onChange(StatusFlow.NOT_PAYDED)
+                    }
+                  }}
                 />
               </FormControl>
             </FormItem>
@@ -417,19 +414,6 @@ export default function DialogCreateCashFlow() {
         >
           Novo cadastro
         </Button>
-
-        {(entitiesSelected.length === 0 || entitiesSelected.length > 1) && (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <AlertTriangle className='cursor-pointer' />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Para cadastrar precisa selecionar apenas uma entidade</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
       </div>
 
       <DialogContent>

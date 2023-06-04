@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Prisma } from '@prisma/client'
+import { StatusFlow, TypeFlow, TypePayment } from '@prisma/client'
 import { format } from 'date-fns'
 import Decimal from 'decimal.js'
 import { CalendarIcon, Check, ChevronsUpDown, Edit } from 'lucide-react'
@@ -59,7 +59,7 @@ const validationSchema = z.object({
   description: z.string().optional(),
   type: z.string(),
   typeFlow: z.string(),
-  status: z.boolean().default(false).optional(),
+  status: z.string().optional(),
   categoryId: z.string(),
   amount: z.number().min(1, 'Valor é campo obrigatório'),
   date: z.date(),
@@ -93,26 +93,17 @@ const FormEditCashFlow = ({ onSuccess, cashFlowId }: PropsFormEntity) => {
     }))
   }, [categories])
 
-  const { data: cashFlow, isLoading } = api.cashFlow.getById.useQuery({
-    id: cashFlowId,
-  })
+  const { data: cashFlow, isLoading } = api.cashFlow.getById.useQuery(
+    {
+      id: cashFlowId,
+    },
+    {
+      enabled: Boolean(cashFlowId),
+    },
+  )
 
-  const amountFormated = new Decimal(cashFlow?.amount || 0)
-
-  console.log(cashFlow)
   const form = useForm<ValidationSchema>({
     resolver: zodResolver(validationSchema),
-
-    values: {
-      name: cashFlow?.name || '',
-      description: cashFlow?.description,
-      categoryId: cashFlow?.categoryId || '',
-      date: cashFlow?.date || new Date(),
-      status: cashFlow?.status || false,
-      type: cashFlow?.type || '',
-      typeFlow: cashFlow?.typeFlow || '',
-      amount: amountFormated.toNumber(),
-    },
   })
 
   const { mutate: edit, isLoading: isLoadingEdit } =
@@ -128,7 +119,7 @@ const FormEditCashFlow = ({ onSuccess, cashFlowId }: PropsFormEntity) => {
         categoryId: values.categoryId,
         date: values.date,
         entityId: entitiesSelected[0]!,
-        status: values.status || false,
+        status: values.status || '',
         type: values.type,
         typeFlow: values.typeFlow,
         amount: values.amount,
@@ -150,6 +141,22 @@ const FormEditCashFlow = ({ onSuccess, cashFlowId }: PropsFormEntity) => {
       },
     )
   }
+
+  useEffect(() => {
+    if (cashFlow) {
+      const amountFormated = new Decimal(cashFlow?.amount || 0)
+      form.reset({
+        name: cashFlow?.name || '',
+        description: cashFlow?.description,
+        categoryId: cashFlow?.categoryId || '',
+        date: cashFlow?.date || new Date(),
+        status: cashFlow?.status,
+        type: cashFlow?.type || TypePayment.TICKET,
+        typeFlow: cashFlow?.typeFlow || '',
+        amount: amountFormated.toNumber(),
+      })
+    }
+  }, [cashFlow, form])
 
   if (isLoading) {
     return <MyLoader />
@@ -174,13 +181,13 @@ const FormEditCashFlow = ({ onSuccess, cashFlowId }: PropsFormEntity) => {
                 >
                   <FormItem className='flex items-center space-x-3 space-y-0'>
                     <FormControl>
-                      <RadioGroupItem value='income' />
+                      <RadioGroupItem value={TypeFlow.INCOME} />
                     </FormControl>
                     <FormLabel className='font-normal'>Receita</FormLabel>
                   </FormItem>
                   <FormItem className='flex items-center space-x-3 space-y-0'>
                     <FormControl>
-                      <RadioGroupItem value='expense' />
+                      <RadioGroupItem value={TypeFlow.EXPENSE} />
                     </FormControl>
                     <FormLabel className='font-normal'>Despesa</FormLabel>
                   </FormItem>
@@ -296,8 +303,10 @@ const FormEditCashFlow = ({ onSuccess, cashFlowId }: PropsFormEntity) => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value='Boleto'>Boleto</SelectItem>
-                  <SelectItem value='Transferência'>Transferência</SelectItem>
+                  <SelectItem value={TypePayment.TICKET}>Boleto</SelectItem>
+                  <SelectItem value={TypePayment.TRANSFER}>
+                    Transferência
+                  </SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -374,12 +383,20 @@ const FormEditCashFlow = ({ onSuccess, cashFlowId }: PropsFormEntity) => {
           render={({ field }) => (
             <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
               <div className='space-y-0.5'>
-                <FormLabel className='text-base'>Status</FormLabel>
+                <FormLabel className='text-base'>
+                  {field.value === StatusFlow.PAYED ? 'Pago' : 'Não Pago'}
+                </FormLabel>
               </div>
               <FormControl>
                 <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
+                  checked={field.value === StatusFlow.PAYED}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      field.onChange(StatusFlow.PAYED)
+                    } else {
+                      field.onChange(StatusFlow.NOT_PAYDED)
+                    }
+                  }}
                 />
               </FormControl>
             </FormItem>

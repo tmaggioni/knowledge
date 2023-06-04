@@ -53,7 +53,7 @@ const FormPermissions = ({ onSuccess, userId }: PropsFormEntity) => {
   const form = useForm<ValidationSchema>({
     resolver: zodResolver(validationSchema),
 
-    values: {
+    defaultValues: {
       entities:
         entities && entities.length > 0
           ? entities?.map((item) => ({

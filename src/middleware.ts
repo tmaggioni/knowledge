@@ -14,12 +14,17 @@ interface UserJwtPayload extends JWTPayload {
 export async function middleware(req: NextRequest) {
   const token = req.cookies.get('user-token')?.value
   const verifiedToken = token && (await verifyAuth(token))
+
   if (
     (req.nextUrl.pathname.startsWith('/login') ||
       req.nextUrl.pathname.startsWith('/register')) &&
     !verifiedToken
   ) {
     return
+  }
+
+  if (!verifiedToken) {
+    return NextResponse.redirect(new URL('/login', req.url))
   }
 
   if (
@@ -34,10 +39,6 @@ export async function middleware(req: NextRequest) {
     (verifiedToken as UserJwtPayload).parent
   ) {
     return NextResponse.redirect(new URL('/dashboard', req.url))
-  }
-
-  if (!verifiedToken) {
-    return NextResponse.redirect(new URL('/login', req.url))
   }
 }
 

@@ -44,7 +44,7 @@ const FormEditEntity = ({ onSuccess, entityId }: PropsFormEntity) => {
   const form = useForm<ValidationSchema>({
     resolver: zodResolver(validationSchema),
 
-    values: {
+    defaultValues: {
       name: entity?.name || '',
       description: entity?.description,
     },
@@ -141,7 +141,7 @@ export function DialogEditEntity({ entityId }: Props) {
 
       <DialogContent className='sm:max-w-[425px]'>
         <DialogHeader>
-          <DialogTitle>Adicionar entidade</DialogTitle>
+          <DialogTitle>Editar entidade</DialogTitle>
         </DialogHeader>
         <FormEditEntity
           onSuccess={() => setModalOpen(false)}

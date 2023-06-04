@@ -1,6 +1,6 @@
 import { type Entity } from '@prisma/client'
 import { type ColumnDef } from '@tanstack/react-table'
-import { Loader, Trash2 } from 'lucide-react'
+import { Loader } from 'lucide-react'
 import { toast } from 'react-toastify'
 
 import Layout from '~/components/layout/layout'
@@ -79,7 +79,7 @@ const Entity = () => {
             { label: 'Entidades' },
           ]}
         />
-        <div className='flex max-w-[50%] flex-col items-start gap-2'>
+        <div className='flex  flex-col items-start gap-2'>
           <div className='flex items-center gap-2'>
             <DialogCreateEntity />
             {(isLoading || isFetching) && (

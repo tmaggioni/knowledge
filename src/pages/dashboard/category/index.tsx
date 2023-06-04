@@ -97,7 +97,7 @@ const Category = () => {
             { label: 'Categorias' },
           ]}
         />
-        <div className='flex max-w-[50%] flex-col items-start gap-2'>
+        <div className='flex flex-col items-start gap-2'>
           <div className='flex items-center gap-2'>
             <DialogCreateCategory />
             {(isLoading || isFetching) && (

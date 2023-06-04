@@ -45,6 +45,8 @@ const Register = () => {
     resolver: zodResolver(validationSchema),
     defaultValues: {
       email: '',
+      password: '',
+      confirmPassword: '',
     },
   })
 

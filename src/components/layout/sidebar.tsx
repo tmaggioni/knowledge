@@ -29,37 +29,48 @@ export function Sidebar({ className }: React.HTMLAttributes<HTMLDivElement>) {
           <div className='space-y-1'>
             {isAdmin && (
               <>
-                <Button
-                  variant='ghost'
-                  size='sm'
-                  className='w-full justify-start'
-                >
-                  <User className='mr-2 h-4 w-4' />
-                  <Link href='/dashboard/users'>Usuários</Link>
-                </Button>
-
-                <Button
-                  variant='ghost'
-                  size='sm'
-                  className='w-full justify-start'
-                >
-                  <User className='mr-2 h-4 w-4' />
-                  <Link href='/dashboard/entity'>Entidades</Link>
-                </Button>
-                <Button
-                  variant='ghost'
-                  size='sm'
-                  className='w-full justify-start'
-                >
-                  <User className='mr-2 h-4 w-4' />
-                  <Link href='/dashboard/category'>Categorias</Link>
-                </Button>
+                <Link href='/dashboard/users'>
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    className='w-full justify-start'
+                  >
+                    <User className='mr-2 h-4 w-4' />
+                    Usuários
+                  </Button>
+                </Link>
+                <Link href='/dashboard/entity'>
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    className='w-full justify-start'
+                  >
+                    <User className='mr-2 h-4 w-4' />
+                    Entidades
+                  </Button>
+                </Link>
+                <Link href='/dashboard/category'>
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    className='w-full justify-start'
+                  >
+                    <User className='mr-2 h-4 w-4' />
+                    Categorias
+                  </Button>
+                </Link>
               </>
             )}
-            <Button variant='ghost' size='sm' className='w-full justify-start'>
-              <User className='mr-2 h-4 w-4' />
-              <Link href='/dashboard/cashflow'>Receitas/Despesas</Link>
-            </Button>
+            <Link href='/dashboard/cashflow'>
+              <Button
+                variant='ghost'
+                size='sm'
+                className='w-full justify-start'
+              >
+                <User className='mr-2 h-4 w-4' />
+                Receitas/Despesas
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

@@ -62,11 +62,11 @@ model CashFlow{
   id  String  @id @default(cuid())
   name String
   description String
-  type        String
-  status      Boolean
+  type        TypePayment
+  status      StatusFlow
   date        DateTime          
   amount      Decimal   
-  typeFlow    String
+  typeFlow    TypeFlow
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
   parent      User              @relation(fields: [parentId], references: [id]) 
@@ -79,4 +79,20 @@ model CashFlow{
   @@index([entityId])
   @@index([categoryId])
   @@index([parentId])
+}
+
+enum TypePayment {
+  TICKET
+  TRANSFER
+  OTHER
+}
+
+enum TypeFlow {
+  INCOME
+  EXPENSE
+}
+
+enum StatusFlow {
+  PAYED
+  NOT_PAYDED
 }

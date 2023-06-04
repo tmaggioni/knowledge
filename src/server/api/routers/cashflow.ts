@@ -1,3 +1,8 @@
+import {
+  type StatusFlow,
+  type TypeFlow,
+  type TypePayment,
+} from '@prisma/client'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
@@ -11,7 +16,7 @@ export const cashFlowRouter = createTRPCRouter({
         description: z.string(),
         type: z.string(),
         typeFlow: z.string(),
-        status: z.boolean(),
+        status: z.string(),
         entityId: z.string(),
         categoryId: z.string(),
         amount: z.number(),
@@ -37,13 +42,13 @@ export const cashFlowRouter = createTRPCRouter({
         data: {
           name,
           description,
-          type,
-          status,
+          type: type as TypePayment,
+          status: status as StatusFlow,
           categoryId,
           entityId,
           date,
           amount,
-          typeFlow,
+          typeFlow: typeFlow as TypeFlow,
           parentId: parent as string,
         },
       })
@@ -64,7 +69,7 @@ export const cashFlowRouter = createTRPCRouter({
         description: z.string(),
         type: z.string(),
         typeFlow: z.string(),
-        status: z.boolean(),
+        status: z.string(),
         entityId: z.string(),
         categoryId: z.string(),
         date: z.date(),
@@ -92,13 +97,13 @@ export const cashFlowRouter = createTRPCRouter({
         data: {
           name,
           description,
-          type,
-          status,
+          type: type as TypePayment,
+          status: status as StatusFlow,
           categoryId,
           entityId,
           date,
-          typeFlow,
           amount,
+          typeFlow: typeFlow as TypeFlow,
         },
       })
 
@@ -114,18 +119,65 @@ export const cashFlowRouter = createTRPCRouter({
     .input(
       z.object({
         entityIds: z.array(z.string()),
+        filters: z
+          .object({
+            name: z.string().optional(),
+            type: z.array(z.string()).optional(),
+            typeFlow: z.array(z.string()).optional(),
+            status: z.array(z.string()).optional(),
+            categoryId: z.array(z.string()).optional(),
+            amount: z.number().optional(),
+            date: z.object({
+              from: z.string().optional(),
+              to: z.string().optional(),
+            }),
+          })
+          .optional(),
         pageIndex: z.number(),
         pageSize: z.number(),
       }),
     )
     .query(async ({ input, ctx }) => {
-      const { entityIds } = input
+      const { entityIds, filters } = input
+      const { date, categoryId, name, status, type, typeFlow } = { ...filters }
       const parent = ctx.parent || ctx.userId
+
       const [cashFlow, total] = await ctx.prisma.$transaction([
         ctx.prisma.cashFlow.findMany({
           where: {
             entityId: {
               in: entityIds,
+            },
+            name: {
+              contains: name,
+            },
+            categoryId: {
+              in: categoryId,
+            },
+            type: {
+              in:
+                type && type?.length > 0 ? (type as TypePayment[]) : undefined,
+            },
+            typeFlow: {
+              in:
+                typeFlow && typeFlow?.length > 0
+                  ? (typeFlow as TypeFlow[])
+                  : undefined,
+            },
+            status: {
+              in:
+                status && status?.length > 0
+                  ? (status as StatusFlow[])
+                  : undefined,
+            },
+
+            date: {
+              lte: new Date(
+                new Date(date?.to || new Date()).setHours(23, 59, 59, 999),
+              ),
+              gte: new Date(
+                new Date(date?.from || new Date()).setHours(0, 0, 0, 0),
+              ),
             },
             parentId: parent as string,
           },

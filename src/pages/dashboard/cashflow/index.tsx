@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
 
-import { type CashFlow } from '@prisma/client'
+import { type CashFlow, TypeFlow } from '@prisma/client'
 import { type ColumnDef, type PaginationState } from '@tanstack/react-table'
 import { format } from 'date-fns'
-import { Loader } from 'lucide-react'
+import { AlertTriangle, Loader } from 'lucide-react'
 import { toast } from 'react-toastify'
 
 import Layout from '~/components/layout/layout'
@@ -13,11 +13,20 @@ import { Breadcrumb } from '~/components/ui/breadcrumb'
 import { Button } from '~/components/ui/button'
 import { DataTable } from '~/components/ui/data-table'
 import { MyDeleteIcon } from '~/components/ui/mydeleteIcon'
-import { useHydratedStore } from '~/hooks/useAppStore'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '~/components/ui/tooltip'
+import { useAppStore, useHydratedStore } from '~/hooks/useAppStore'
 import { api } from '~/utils/api'
 
 const CashFlow = () => {
   const entitiesSelected = useHydratedStore('entitiesSelected')
+  const filterOpen = useHydratedStore('filterOpen')
+  const filters = useHydratedStore('filters')
+  const setFilterOpen = useAppStore((state) => state.setFilterOpen)
   const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -36,12 +45,19 @@ const CashFlow = () => {
     isLoading,
     isFetching,
   } = api.cashFlow.getAll.useQuery({
+    filters: {
+      ...filters,
+      date: {
+        from: filters.date?.from.toString(),
+        to: filters.date?.to.toString(),
+      },
+    },
     entityIds: entitiesSelected || [],
     pageIndex,
     pageSize,
   })
   const { mutate: removeCashFlow, isLoading: isLoadingRemove } =
-    api.category.remove.useMutation()
+    api.cashFlow.remove.useMutation()
   const utils = api.useContext()
 
   const handleRemoveCashFlow = (id: string) => {
@@ -99,8 +115,8 @@ const CashFlow = () => {
 
         return (
           <>
-            {cashFlow.typeFlow === 'income' && 'Receita'}
-            {cashFlow.typeFlow === 'expense' && 'Despesa'}
+            {cashFlow.typeFlow === TypeFlow.INCOME && 'Receita'}
+            {cashFlow.typeFlow === TypeFlow.EXPENSE && 'Despesa'}
           </>
         )
       },
@@ -146,9 +162,29 @@ const CashFlow = () => {
             { label: 'Entradas/saidas' },
           ]}
         />
-        <div className='flex max-w-[50%] flex-col items-start gap-2'>
+        <div className='flex flex-col items-start gap-2'>
           <div className='flex items-center gap-2'>
             <DialogCreateCashFlow />
+
+            <Button
+              variant='default'
+              onClick={() => setFilterOpen(!filterOpen)}
+              disabled={entitiesSelected.length === 0}
+            >
+              Filtrar
+            </Button>
+            {(entitiesSelected.length === 0 || entitiesSelected.length > 1) && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <AlertTriangle className='cursor-pointer' />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Para cadastrar precisa selecionar apenas uma entidade</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
             {(isLoading || isFetching) && (
               <Loader className='mr-2 h-4 w-4 animate-spin' />
             )}
