@@ -122,7 +122,12 @@ export const cashFlowRouter = createTRPCRouter({
             typeFlow: z.array(z.string()).optional(),
             status: z.array(z.string()).optional(),
             categoryId: z.array(z.string()).optional(),
-            amount: z.number().optional(),
+            amountRange: z
+              .object({
+                minValue: z.number().optional(),
+                maxValue: z.number().optional(),
+              })
+              .optional(),
             date: z.object({
               from: z.string().optional(),
               to: z.string().optional(),
@@ -135,7 +140,9 @@ export const cashFlowRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       const { entityIds, filters } = input
-      const { date, categoryId, name, status, type, typeFlow } = { ...filters }
+      const { date, categoryId, name, status, type, typeFlow, amountRange } = {
+        ...filters,
+      }
       const parent = ctx.parent || ctx.userId
 
       const [cashFlow, total] = await ctx.prisma.$transaction([
@@ -149,6 +156,10 @@ export const cashFlowRouter = createTRPCRouter({
             },
             categoryId: {
               in: categoryId,
+            },
+            amount: {
+              lte: amountRange?.maxValue,
+              gte: amountRange?.minValue,
             },
             type: {
               in:

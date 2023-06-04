@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react'
 
 import { EntityBar } from './entitybar'
-import { FiltersCashFlow } from './filtersCashFlow'
+import { FiltersRightBar } from './filtersRightBar'
 import { Navbar } from './navbar'
 import { Sidebar } from './sidebar'
 
@@ -12,7 +12,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         <Sidebar />
         <EntityBar />
         <main className='relative h-screen w-full'>
-          <FiltersCashFlow />
+          <FiltersRightBar />
           <Navbar />
           {children}
         </main>

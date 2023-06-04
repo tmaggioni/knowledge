@@ -1,12 +1,4 @@
-import {
-  Bar,
-  BarChart,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-} from 'recharts'
+import { Pie, PieChart, ResponsiveContainer } from 'recharts'
 
 const data01 = [
   {

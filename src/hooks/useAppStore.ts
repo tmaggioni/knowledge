@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+import { TypeFlow } from '@prisma/client'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
@@ -16,6 +17,13 @@ type GetFunctionKeys<T> = {
 
 type OmittedFunctionKeys<T> = Omit<T, GetFunctionKeys<T>>
 
+interface ValidationFilterSchemaWithAmountRange extends ValidationFilterSchema {
+  amountRange: {
+    minValue: number
+    maxValue: number
+  }
+}
+
 type AppStoreState = {
   darkOn: boolean
   setDarkOn: (themeMode: boolean) => void
@@ -27,17 +35,25 @@ type AppStoreState = {
   setEntitiesSelected: (entitiesSelected: string[]) => void
   filterOpen: boolean
   setFilterOpen: (filterOpen: boolean) => void
-  filters: Partial<ValidationFilterSchema>
-  setFilters: (filters: Partial<ValidationFilterSchema>) => void
+  filters: Partial<ValidationFilterSchemaWithAmountRange>
+  setFilters: (filters: Partial<ValidationFilterSchemaWithAmountRange>) => void
 }
+const date = new Date()
+const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1)
+const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0)
 
-const initialStates = {
+const initialStates: OmittedFunctionKeys<AppStoreState> = {
   entityOpened: false,
   darkOn: false,
   user: null,
   filterOpen: false,
   entitiesSelected: [],
-  filters: {},
+  filters: {
+    date: {
+      to: new Date(lastDayOfMonth.setHours(23, 59, 59, 999)),
+      from: new Date(firstDayOfMonth.setHours(0, 0, 0, 0)),
+    },
+  },
 }
 
 export const useAppStore = create<AppStoreState>()(
@@ -56,18 +72,14 @@ export const useAppStore = create<AppStoreState>()(
         set({
           entitiesSelected,
         }),
+
       // filters: {
       //   date: {
-      //     to: new Date(new Date().setHours(0, 0, 0, 0)),
-      //     from: new Date(new Date().setHours(23, 59, 59, 999)),
+      //     to: new Date(new Date().setHours(23, 59, 59, 999)),
+      //     from: new Date(new Date().setHours(0, 0, 0, 0)),
       //   },
       // },
-      filters: {
-        date: {
-          to: new Date(new Date().setHours(23, 59, 59, 999)),
-          from: new Date(new Date().setHours(0, 0, 0, 0)),
-        },
-      },
+      filters: initialStates.filters,
       setFilters: (filters) =>
         set({
           filters,

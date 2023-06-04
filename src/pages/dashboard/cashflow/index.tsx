@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 
-import { type CashFlow, TypeFlow } from '@prisma/client'
+import { type CashFlow, StatusFlow, TypeFlow } from '@prisma/client'
 import { type ColumnDef, type PaginationState } from '@tanstack/react-table'
-import { format } from 'date-fns'
+import { format, isBefore } from 'date-fns'
 import { AlertTriangle, Loader } from 'lucide-react'
 import { NumericFormat } from 'react-number-format'
 import { toast } from 'react-toastify'
@@ -165,7 +165,6 @@ const CashFlow = () => {
       header: 'Categoria',
       cell: ({ row }) => {
         const cashFlow = row.original
-
         return <>{cashFlow.category.name}</>
       },
     },
@@ -215,6 +214,24 @@ const CashFlow = () => {
               disabled
               value={Number(cashFlow.amount)}
             />
+          </div>
+        )
+      },
+    },
+    {
+      accessorKey: 'status',
+      header: () => <div className='text-right'>{'Status'}</div>,
+      cell: ({ row }) => {
+        const cashFlow = row.original
+
+        return (
+          <div className='flex items-center gap-1'>
+            {cashFlow.status === StatusFlow.PAYED && 'Pago'}
+            {cashFlow.status === StatusFlow.NOT_PAYDED && 'Não pago'}
+            {isBefore(cashFlow.date, new Date()) &&
+              cashFlow.status === StatusFlow.NOT_PAYDED && (
+                <AlertTriangle color='hsl(var(--destructive))' />
+              )}
           </div>
         )
       },
