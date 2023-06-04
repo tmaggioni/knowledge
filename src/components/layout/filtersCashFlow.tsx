@@ -70,8 +70,8 @@ export const FiltersCashFlow = () => {
       type: filters.type,
       typeFlow: filters.typeFlow,
       date: {
-        from: filters.date?.from,
-        to: filters.date?.to,
+        from: filters.date?.from || new Date(),
+        to: filters.date?.to || new Date(),
       },
     },
   })
@@ -122,7 +122,7 @@ export const FiltersCashFlow = () => {
                               />
                             </FormControl>
                             <FormLabel className='font-normal'>
-                              Receita {JSON.stringify(field.value)}
+                              Receita
                             </FormLabel>
                           </FormItem>
                         )

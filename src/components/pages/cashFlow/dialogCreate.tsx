@@ -399,11 +399,11 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
 }
 
 export default function DialogCreateCashFlow() {
-  const [modalOpen, setModalOpen] = useState<boolean | undefined>(false)
+  const [modalOpen, setModalOpen] = useState<boolean>(false)
   const entitiesSelected = useHydratedStore('entitiesSelected')
 
   return (
-    <Dialog open={modalOpen} onOpenChange={setModalOpen} modal>
+    <Dialog open={modalOpen} onOpenChange={setModalOpen}>
       <div className='flex items-center gap-2'>
         <Button
           variant='default'

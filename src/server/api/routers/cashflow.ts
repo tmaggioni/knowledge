@@ -1,8 +1,4 @@
-import {
-  type StatusFlow,
-  type TypeFlow,
-  type TypePayment,
-} from '@prisma/client'
+import { type StatusFlow, TypeFlow, type TypePayment } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
@@ -190,9 +186,19 @@ export const cashFlowRouter = createTRPCRouter({
         ctx.prisma.cashFlow.count(),
       ])
 
+      const totalProfit = cashFlow.reduce((profit, transaction) => {
+        if (transaction.typeFlow === TypeFlow.INCOME) {
+          return profit + Number(transaction.amount)
+        } else if (transaction.typeFlow === TypeFlow.EXPENSE) {
+          return profit - Number(transaction.amount)
+        } else {
+          return profit
+        }
+      }, 0)
       return {
         cashFlow,
         total,
+        totalProfit,
       }
     }),
   getById: privateProcedure

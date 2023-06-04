@@ -56,10 +56,16 @@ export const useAppStore = create<AppStoreState>()(
         set({
           entitiesSelected,
         }),
+      // filters: {
+      //   date: {
+      //     to: new Date(new Date().setHours(0, 0, 0, 0)),
+      //     from: new Date(new Date().setHours(23, 59, 59, 999)),
+      //   },
+      // },
       filters: {
         date: {
-          to: new Date(new Date().setHours(0, 0, 0, 0)),
-          from: new Date(new Date().setHours(23, 59, 59, 999)),
+          to: new Date(new Date().setHours(23, 59, 59, 999)),
+          from: new Date(new Date().setHours(0, 0, 0, 0)),
         },
       },
       setFilters: (filters) =>
