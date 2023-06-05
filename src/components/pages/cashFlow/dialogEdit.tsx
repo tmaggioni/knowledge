@@ -146,13 +146,13 @@ const FormEditCashFlow = ({ onSuccess, cashFlowId }: PropsFormEntity) => {
     if (cashFlow) {
       const amountFormated = new Decimal(cashFlow?.amount || 0)
       form.reset({
-        name: cashFlow?.name || '',
-        description: cashFlow?.description,
-        categoryId: cashFlow?.categoryId || '',
-        date: cashFlow?.date || new Date(),
-        status: cashFlow?.status,
-        type: cashFlow?.type || TypePayment.TICKET,
-        typeFlow: cashFlow?.typeFlow || '',
+        name: cashFlow.name,
+        description: cashFlow.description,
+        categoryId: cashFlow.categoryId,
+        date: cashFlow.date,
+        status: cashFlow.status,
+        type: TypePayment.TICKET,
+        typeFlow: cashFlow.typeFlow,
         amount: amountFormated.toNumber(),
       })
     }
@@ -296,7 +296,7 @@ const FormEditCashFlow = ({ onSuccess, cashFlowId }: PropsFormEntity) => {
           name='type'
           render={({ field }) => (
             <FormItem>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder='Selecione a forma' />

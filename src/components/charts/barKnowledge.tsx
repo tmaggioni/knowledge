@@ -1,60 +1,27 @@
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 
-const data = [
-  {
-    name: 'Jan',
-    total: 100,
-  },
-  {
-    name: 'Feb',
-    total: 100,
-  },
-  {
-    name: 'Mar',
-    total: 100,
-  },
-  {
-    name: 'Apr',
-    total: 100,
-  },
-  {
-    name: 'May',
-    total: 100,
-  },
-  {
-    name: 'Jun',
-    total: 100,
-  },
-  {
-    name: 'Jul',
-    total: 100,
-  },
-  {
-    name: 'Aug',
-    total: 100,
-  },
-  {
-    name: 'Sep',
-    total: 100,
-  },
-  {
-    name: 'Oct',
-    total: 100,
-  },
-  {
-    name: 'Nov',
-    total: 100,
-  },
-  {
-    name: 'Dec',
-    total: 100,
-  },
-]
+import { useHydratedStore } from '~/hooks/useAppStore'
+import { api } from '~/utils/api'
+
+import { MyLoader } from '../ui/myloader'
 
 export function BarKnowledge() {
+  const entitiesSelected = useHydratedStore('entitiesSelected')
+  const { data, isLoading } = api.cashFlow.getTheBarData.useQuery({
+    entityIds: entitiesSelected,
+  })
+
+  const newData = data?.map((item) => ({
+    name: item.month,
+    ['income']: item.income,
+    ['expense']: item.expense,
+  }))
+
+  if (isLoading) return <MyLoader />
+
   return (
     <ResponsiveContainer width='100%' height={350}>
-      <BarChart data={data}>
+      <BarChart data={newData} defaultShowTooltip={false}>
         <XAxis
           dataKey='name'
           stroke='#888888'
@@ -67,13 +34,10 @@ export function BarKnowledge() {
           axisLine={false}
           tickFormatter={(value) => `$${value as string}`}
         />
-        <Bar
-          dataKey='total'
-          fill='#ccc'
-          radius={[4, 4, 0, 0]}
-          // onClick={() => alert('asdasdd')}
-          // onMouseOver={(a) => alert('entrou')}
-        />
+        <Bar dataKey='total' fill='#ccc' radius={[4, 4, 0, 0]} />
+
+        <Bar dataKey={'income'} fill='#39b984' />
+        <Bar dataKey={'expense'} fill='#a11326' />
       </BarChart>
     </ResponsiveContainer>
   )

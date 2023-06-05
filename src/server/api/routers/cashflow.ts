@@ -4,6 +4,29 @@ import { z } from 'zod'
 
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 
+function getMonthAbbreviationBR(monthNumber: number) {
+  const monthsBR = [
+    'Jan',
+    'Fev',
+    'Mar',
+    'Abr',
+    'Mai',
+    'Jun',
+    'Jul',
+    'Ago',
+    'Set',
+    'Out',
+    'Nov',
+    'Dez',
+  ]
+
+  if (monthNumber < 1 || monthNumber > 12) {
+    throw new Error('Month number must be between 1 and 12')
+  }
+
+  return monthsBR[monthNumber - 1]
+}
+
 export const cashFlowRouter = createTRPCRouter({
   create: privateProcedure
     .input(
@@ -34,7 +57,7 @@ export const cashFlowRouter = createTRPCRouter({
 
       const parent = ctx.parent || ctx.userId
 
-      const cashFlow = await ctx.prisma.cashFlow.create({
+      const cashFlow = await ctx.prisma.cashFlow.createMany({
         data: {
           name,
           description,
@@ -194,7 +217,49 @@ export const cashFlowRouter = createTRPCRouter({
           skip: input.pageIndex,
           take: input.pageSize,
         }),
-        ctx.prisma.cashFlow.count(),
+        ctx.prisma.cashFlow.count({
+          where: {
+            entityId: {
+              in: entityIds,
+            },
+            name: {
+              contains: name,
+            },
+            categoryId: {
+              in: categoryId,
+            },
+            amount: {
+              lte: amountRange?.maxValue,
+              gte: amountRange?.minValue,
+            },
+            type: {
+              in:
+                type && type?.length > 0 ? (type as TypePayment[]) : undefined,
+            },
+            typeFlow: {
+              in:
+                typeFlow && typeFlow?.length > 0
+                  ? (typeFlow as TypeFlow[])
+                  : undefined,
+            },
+            status: {
+              in:
+                status && status?.length > 0
+                  ? (status as StatusFlow[])
+                  : undefined,
+            },
+
+            date: {
+              lte: new Date(
+                new Date(date?.to || new Date()).setHours(23, 59, 59, 999),
+              ),
+              gte: new Date(
+                new Date(date?.from || new Date()).setHours(0, 0, 0, 0),
+              ),
+            },
+            parentId: parent as string,
+          },
+        }),
       ])
 
       const totalProfit = cashFlow.reduce((profit, transaction) => {
@@ -211,6 +276,63 @@ export const cashFlowRouter = createTRPCRouter({
         total,
         totalProfit,
       }
+    }),
+
+  getTheBarData: privateProcedure
+    .input(z.object({ entityIds: z.array(z.string()) }))
+    .query(async ({ ctx, input }) => {
+      const { entityIds } = input
+      const parent = ctx.parent || ctx.userId
+      const result = []
+
+      for (let month = 0; month < 12; month++) {
+        const incomeData = await ctx.prisma.cashFlow.aggregate({
+          _sum: {
+            amount: true,
+          },
+          where: {
+            entityId: {
+              in: entityIds,
+            },
+            date: {
+              gte: new Date(new Date().getFullYear(), month, 1),
+              lt: new Date(new Date().getFullYear(), month + 1, 1),
+            },
+            typeFlow: TypeFlow.INCOME,
+            parentId: parent as string,
+          },
+        })
+
+        const expenseData = await ctx.prisma.cashFlow.aggregate({
+          _sum: {
+            amount: true,
+          },
+          where: {
+            entityId: {
+              in: entityIds,
+            },
+            date: {
+              gte: new Date(new Date().getFullYear(), month, 1),
+              lt: new Date(new Date().getFullYear(), month + 1, 1),
+            },
+            typeFlow: TypeFlow.EXPENSE,
+            parentId: parent as string,
+          },
+        })
+
+        const income = incomeData._sum.amount || 0
+        const expense = expenseData._sum.amount || 0
+        const total = Number(income) - Number(expense)
+
+        result.push({
+          month: getMonthAbbreviationBR(month + 1),
+          income,
+          expense,
+          total,
+        })
+      }
+
+      return result
     }),
   getById: privateProcedure
     .input(z.object({ id: z.string() }))

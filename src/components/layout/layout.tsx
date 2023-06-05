@@ -11,7 +11,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       <div className='relative flex gap-2'>
         <Sidebar />
         <EntityBar />
-        <main className='relative h-screen w-full'>
+        <main className='relative h-screen w-full overflow-x-hidden'>
           <FiltersRightBar />
           <Navbar />
           {children}
