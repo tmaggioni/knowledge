@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Edit } from 'lucide-react'
@@ -43,11 +43,6 @@ const FormEditCategory = ({ onSuccess, categoryId }: PropsFormEntity) => {
   })
   const form = useForm<ValidationSchema>({
     resolver: zodResolver(validationSchema),
-
-    defaultValues: {
-      name: category?.name || '',
-      description: category?.description,
-    },
   })
 
   const { mutate: edit, isLoading: isLoadingEdit } =
@@ -77,6 +72,15 @@ const FormEditCategory = ({ onSuccess, categoryId }: PropsFormEntity) => {
       },
     )
   }
+
+  useEffect(() => {
+    if (category) {
+      form.reset({
+        name: category.name,
+        description: category.description,
+      })
+    }
+  }, [category, form])
 
   if (isLoading) {
     return <MyLoader />
@@ -140,7 +144,7 @@ export function DialogEditCategory({ categoryId }: Props) {
 
       <DialogContent className='sm:max-w-[425px]'>
         <DialogHeader>
-          <DialogTitle>Adicionar entidade</DialogTitle>
+          <DialogTitle>Editar categoria</DialogTitle>
         </DialogHeader>
         <FormEditCategory
           onSuccess={() => setModalOpen(false)}

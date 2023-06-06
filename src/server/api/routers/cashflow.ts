@@ -3,29 +3,7 @@ import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
-
-function getMonthAbbreviationBR(monthNumber: number) {
-  const monthsBR = [
-    'Jan',
-    'Fev',
-    'Mar',
-    'Abr',
-    'Mai',
-    'Jun',
-    'Jul',
-    'Ago',
-    'Set',
-    'Out',
-    'Nov',
-    'Dez',
-  ]
-
-  if (monthNumber < 1 || monthNumber > 12) {
-    throw new Error('Month number must be between 1 and 12')
-  }
-
-  return monthsBR[monthNumber - 1]
-}
+import { getMonthString } from '~/utils/helper'
 
 export const cashFlowRouter = createTRPCRouter({
   create: privateProcedure
@@ -57,13 +35,14 @@ export const cashFlowRouter = createTRPCRouter({
 
       const parent = ctx.parent || ctx.userId
 
-      const cashFlow = await ctx.prisma.cashFlow.createMany({
+      const cashFlow = await ctx.prisma.cashFlow.create({
         data: {
           name,
           description,
           type: type as TypePayment,
           status: status as StatusFlow,
           categoryId,
+          month: date.getMonth() + 1,
           entityId,
           date,
           amount,
@@ -119,6 +98,7 @@ export const cashFlowRouter = createTRPCRouter({
           type: type as TypePayment,
           status: status as StatusFlow,
           categoryId,
+          month: date.getMonth() + 1,
           entityId,
           date,
           amount,
@@ -283,53 +263,136 @@ export const cashFlowRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { entityIds } = input
       const parent = ctx.parent || ctx.userId
+
+      const income = await ctx.prisma.cashFlow.groupBy({
+        by: ['month'],
+        _sum: {
+          amount: true,
+        },
+        where: {
+          entityId: {
+            in: entityIds,
+          },
+          date: {
+            gte: new Date(new Date().getFullYear(), 0, 1),
+            lt: new Date(new Date().getFullYear(), 11, 1),
+          },
+          typeFlow: TypeFlow.INCOME,
+          parentId: parent as string,
+        },
+      })
+
+      const expense = await ctx.prisma.cashFlow.groupBy({
+        by: ['month'],
+        _sum: {
+          amount: true,
+        },
+        where: {
+          entityId: {
+            in: entityIds,
+          },
+          date: {
+            gte: new Date(new Date().getFullYear(), 0, 1),
+            lt: new Date(new Date().getFullYear(), 11, 1),
+          },
+          typeFlow: TypeFlow.EXPENSE,
+          parentId: parent as string,
+        },
+      })
+
+      const result = []
+      for (let month = 0; month < 12; month++) {
+        result.push({
+          name: getMonthString(month + 1),
+          receitas:
+            income.find((item) => item.month === month + 1)?._sum.amount ?? 0,
+          despesas:
+            expense.find((item) => item.month === month + 1)?._sum.amount ?? 0,
+        })
+      }
+
+      return result
+    }),
+  getTheIncomePieData: privateProcedure
+    .input(z.object({ entityIds: z.array(z.string()) }))
+    .query(async ({ ctx, input }) => {
+      const { entityIds } = input
+      const parent = ctx.parent || ctx.userId
+
+      const income = await ctx.prisma.cashFlow.groupBy({
+        by: ['categoryId'],
+        _sum: {
+          amount: true,
+        },
+        where: {
+          entityId: {
+            in: entityIds,
+          },
+          date: {
+            gte: new Date(new Date().getFullYear(), 0, 1),
+            lt: new Date(new Date().getFullYear(), 11, 1),
+          },
+          typeFlow: TypeFlow.INCOME,
+          parentId: parent as string,
+        },
+      })
+
       const result = []
 
-      for (let month = 0; month < 12; month++) {
-        const incomeData = await ctx.prisma.cashFlow.aggregate({
-          _sum: {
-            amount: true,
-          },
-          where: {
-            entityId: {
-              in: entityIds,
-            },
-            date: {
-              gte: new Date(new Date().getFullYear(), month, 1),
-              lt: new Date(new Date().getFullYear(), month + 1, 1),
-            },
-            typeFlow: TypeFlow.INCOME,
-            parentId: parent as string,
-          },
-        })
+      const allCategoriesByParent = await ctx.prisma.category.findMany({
+        where: { parentId: parent as string },
+      })
 
-        const expenseData = await ctx.prisma.cashFlow.aggregate({
-          _sum: {
-            amount: true,
-          },
-          where: {
-            entityId: {
-              in: entityIds,
-            },
-            date: {
-              gte: new Date(new Date().getFullYear(), month, 1),
-              lt: new Date(new Date().getFullYear(), month + 1, 1),
-            },
-            typeFlow: TypeFlow.EXPENSE,
-            parentId: parent as string,
-          },
-        })
+      for (const record of income) {
+        const categoryName = allCategoriesByParent.find(
+          (item) => item.id === record.categoryId,
+        )?.name
+        if (categoryName) {
+          result.push({
+            name: categoryName,
+            value: Number(record._sum.amount),
+          })
+        }
+      }
 
-        const income = incomeData._sum.amount || 0
-        const expense = expenseData._sum.amount || 0
-        const total = Number(income) - Number(expense)
+      return result
+    }),
+  getTheExpensePieData: privateProcedure
+    .input(z.object({ entityIds: z.array(z.string()) }))
+    .query(async ({ ctx, input }) => {
+      const { entityIds } = input
+      const parent = ctx.parent || ctx.userId
 
-        result.push({
-          month: getMonthAbbreviationBR(month + 1),
-          income,
-          expense,
-          total,
+      const expense = await ctx.prisma.cashFlow.groupBy({
+        by: ['categoryId'],
+        _sum: {
+          amount: true,
+        },
+        where: {
+          entityId: {
+            in: entityIds,
+          },
+          date: {
+            gte: new Date(new Date().getFullYear(), 0, 1),
+            lt: new Date(new Date().getFullYear(), 11, 1),
+          },
+          typeFlow: TypeFlow.EXPENSE,
+          parentId: parent as string,
+        },
+      })
+
+      const result = []
+
+      for (const record of expense) {
+        const category = await ctx.prisma.category.findUnique({
+          where: { id: record.categoryId },
         })
+        if (category) {
+          result.push({
+            name: category.name,
+            value: Number(record._sum.amount),
+          })
+        }
       }
 
       return result

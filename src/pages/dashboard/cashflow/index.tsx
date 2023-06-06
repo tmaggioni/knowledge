@@ -1,6 +1,11 @@
 import { useMemo, useState } from 'react'
 
-import { type CashFlow, StatusFlow, TypeFlow } from '@prisma/client'
+import {
+  type CashFlow,
+  StatusFlow,
+  TypeFlow,
+  TypePayment,
+} from '@prisma/client'
 import { type ColumnDef, type PaginationState } from '@tanstack/react-table'
 import { format, isBefore } from 'date-fns'
 import { AlertTriangle, Loader } from 'lucide-react'
@@ -159,6 +164,16 @@ const CashFlow = () => {
     {
       accessorKey: 'type',
       header: 'Tipo pagamento',
+      cell: ({ row }) => {
+        const cashFlow = row.original
+
+        return (
+          <>
+            {cashFlow.type === TypePayment.TICKET && 'Boleto'}
+            {cashFlow.type === TypePayment.TRANSFER && 'Transferência'}
+          </>
+        )
+      },
     },
     {
       accessorKey: 'category',

@@ -1,64 +1,52 @@
-import { Pie, PieChart, ResponsiveContainer } from 'recharts'
+import {
+  LabelList,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+} from 'recharts'
 
-const data01 = [
-  {
-    'name': 'Group A',
-    'value': 400,
-  },
-  {
-    'name': 'Group B',
-    'value': 300,
-  },
-  {
-    'name': 'Group C',
-    'value': 300,
-  },
-  {
-    'name': 'Group D',
-    'value': 200,
-  },
-  {
-    'name': 'Group E',
-    'value': 278,
-  },
-  {
-    'name': 'Group F',
-    'value': 189,
-  },
-]
-const data02 = [
-  {
-    'name': 'Group A',
-    'value': 2400,
-  },
-  {
-    'name': 'Group B',
-    'value': 4567,
-  },
-  {
-    'name': 'Group C',
-    'value': 1398,
-  },
-  {
-    'name': 'Group D',
-    'value': 9800,
-  },
-  {
-    'name': 'Group E',
-    'value': 3908,
-  },
-  {
-    'name': 'Group F',
-    'value': 4800,
-  },
-]
+import { useHydratedStore } from '~/hooks/useAppStore'
+import { api } from '~/utils/api'
+
+const BRL = new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL',
+})
 
 export function PieKnowledge() {
+  const entitiesSelected = useHydratedStore('entitiesSelected')
+  const { data: expenses, isLoading } =
+    api.cashFlow.getTheExpensePieData.useQuery(
+      {
+        entityIds: entitiesSelected,
+      },
+      {
+        enabled: entitiesSelected.length > 0,
+      },
+    )
+
+  const { data: incomes, isLoading: isLoadingIncomings } =
+    api.cashFlow.getTheIncomePieData.useQuery(
+      {
+        entityIds: entitiesSelected,
+      },
+      {
+        enabled: entitiesSelected.length > 0,
+      },
+    )
+
+  console.log({
+    expenses,
+  })
   return (
     <ResponsiveContainer width='100%' height={350}>
-      <PieChart height={250}>
+      <PieChart height={250} defaultShowTooltip>
+        <Tooltip formatter={(value) => BRL.format(Number(value))} />
+        <LabelList />
         <Pie
-          data={data01}
+          legendType='diamond'
+          data={expenses}
           dataKey='value'
           nameKey='name'
           cx='50%'
@@ -67,7 +55,7 @@ export function PieKnowledge() {
           fill='#8884d8'
         />
         <Pie
-          data={data02}
+          data={incomes}
           dataKey='value'
           nameKey='name'
           cx='50%'
