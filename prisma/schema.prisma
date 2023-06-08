@@ -19,6 +19,7 @@ model User {
   entitiesUsers UsersEntity[]
   categories Category[]
   cashFlow    CashFlow[]
+  bankAccount BankAccount[]
 }
 
 model Entity {
@@ -30,7 +31,7 @@ model Entity {
   parent      User              @relation(fields: [parentId], references: [id]) 
   parentId    String
   users       UsersEntity[]
-  cashflow CashFlow[]
+  cashflow    CashFlow[]
   @@index([parentId])
 }
 
@@ -57,6 +58,18 @@ model Category {
   @@index([parentId])
 }
 
+model BankAccount {
+  id          String            @id @default(cuid())
+  name        String            
+  description String
+  amount      Decimal           @default(0)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  parent      User              @relation(fields: [parentId], references: [id]) 
+  parentId    String
+  cashFlow    CashFlow[]
+  @@index([parentId])
+}
 
 model CashFlow{
   id  String  @id @default(cuid())
@@ -76,11 +89,14 @@ model CashFlow{
   entityId    String
   category      Category        @relation(fields: [categoryId], references: [id]) 
   categoryId    String
+  bankAccount      BankAccount  @relation(fields: [bankAccountId], references: [id]) 
+  bankAccountId    String
 
 
   @@index([entityId])
   @@index([categoryId])
   @@index([parentId])
+  @@index([bankAccountId])
 }
 
 enum TypePayment {

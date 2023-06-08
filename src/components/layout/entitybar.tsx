@@ -1,3 +1,5 @@
+import { useEffect, useMemo, useState } from 'react'
+
 import Link from 'next/link'
 
 import { CopyX, User } from 'lucide-react'
@@ -7,9 +9,11 @@ import { useAppStore, useHydratedStore } from '~/hooks/useAppStore'
 import { cn } from '~/lib/utils'
 import { api } from '~/utils/api'
 
+import { Checkbox } from '../ui/checkbox'
 import { MyLoader } from '../ui/myloader'
 
 export function EntityBar({ className }: React.HTMLAttributes<HTMLDivElement>) {
+  const [selectAll, setSelectAll] = useState(false)
   const user = useHydratedStore('user')
   const entityOpened = useHydratedStore('entityOpened')
   const entitiesSelected = useHydratedStore('entitiesSelected')
@@ -23,6 +27,35 @@ export function EntityBar({ className }: React.HTMLAttributes<HTMLDivElement>) {
   // if (!entityOpened) {
   //   return null
   // }
+  const entitiesParentId = useMemo(() => {
+    if (!entities) return []
+    if (!entities.entitiesParent) return []
+    return entities.entitiesParent.map((item) => item.id)
+  }, [entities])
+
+  const entitiesUsersId = useMemo(() => {
+    if (!entities) return []
+    if (!entities.entitiesUsers) return []
+    return entities.entitiesUsers.map((item) => item.entity.id)
+  }, [entities])
+
+  useEffect(() => {
+    if (selectAll) {
+      if (isAdmin) {
+        setEntitiesSelected(entitiesParentId || [])
+      } else {
+        setEntitiesSelected(entitiesUsersId || [])
+      }
+    } else {
+      setEntitiesSelected([])
+    }
+  }, [
+    entitiesParentId,
+    entitiesUsersId,
+    isAdmin,
+    selectAll,
+    setEntitiesSelected,
+  ])
 
   if (isLoading) {
     return <MyLoader />
@@ -47,7 +80,22 @@ export function EntityBar({ className }: React.HTMLAttributes<HTMLDivElement>) {
               }}
             />
           </h2>
-
+          <div className='mt-2 flex items-center gap-2'>
+            <Checkbox
+              id='all'
+              checked={selectAll}
+              onCheckedChange={(checked) => {
+                if (checked) {
+                  setSelectAll(true)
+                } else {
+                  setSelectAll(false)
+                }
+              }}
+            />
+            <label htmlFor='all' className='cursor-pointer'>
+              Todos
+            </label>
+          </div>
           {isAdmin &&
             entities?.entitiesParent?.map((item) => (
               <Button

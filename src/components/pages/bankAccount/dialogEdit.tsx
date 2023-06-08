@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Edit } from 'lucide-react'
 import { useForm } from 'react-hook-form'
+import { type NumberFormatValues, NumericFormat } from 'react-number-format'
 import { toast } from 'react-toastify'
 import { z } from 'zod'
 
@@ -27,6 +28,7 @@ import { api } from '~/utils/api'
 
 const validationSchema = z.object({
   name: z.string().min(1, { message: 'nome é obrigatório' }),
+  amount: z.number().min(1, 'Valor é campo obrigatório'),
   description: z.string().optional(),
 })
 
@@ -34,35 +36,35 @@ type ValidationSchema = z.infer<typeof validationSchema>
 
 interface PropsFormEntity {
   onSuccess: () => void
-  entityId: string
+  bankAccountId: string
 }
 
-const FormEditEntity = ({ onSuccess, entityId }: PropsFormEntity) => {
-  const { data: entity, isLoading } = api.entity.getById.useQuery({
-    id: entityId,
+const FormEditBankAccount = ({ onSuccess, bankAccountId }: PropsFormEntity) => {
+  const { data: bankAccount, isLoading } = api.bankAccount.getById.useQuery({
+    id: bankAccountId,
   })
   const form = useForm<ValidationSchema>({
     resolver: zodResolver(validationSchema),
   })
 
   const { mutate: edit, isLoading: isLoadingEdit } =
-    api.entity.edit.useMutation()
+    api.bankAccount.edit.useMutation()
   const utils = api.useContext()
 
   function onSubmit(values: ValidationSchema) {
     edit(
       {
-        id: entityId,
+        id: bankAccountId,
         name: values.name,
+        amount: values.amount,
         description: values.description || '',
       },
       {
         onSuccess: (data) => {
-          toast(`Entidade ${data.name} editada com sucesso`, {
+          toast(`Conta corrente ${data.name} editada com sucesso`, {
             type: 'success',
           })
-          void utils.entity.getAll.invalidate()
-          void utils.entity.getAllByUser.invalidate()
+          void utils.bankAccount.getAll.invalidate()
           onSuccess()
         },
         onError: (err) => {
@@ -75,13 +77,13 @@ const FormEditEntity = ({ onSuccess, entityId }: PropsFormEntity) => {
   }
 
   useEffect(() => {
-    if (entity) {
+    if (bankAccount) {
       form.reset({
-        name: entity.name,
-        description: entity.description,
+        name: bankAccount.name,
+        description: bankAccount.description,
       })
     }
-  }, [entity, form])
+  }, [bankAccount, form])
 
   if (isLoading) {
     return <MyLoader />
@@ -99,6 +101,27 @@ const FormEditEntity = ({ onSuccess, entityId }: PropsFormEntity) => {
             <FormItem>
               <FormControl>
                 <Input placeholder='Nome' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name='amount'
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <NumericFormat
+                  thousandSeparator='.'
+                  decimalSeparator=','
+                  prefix='R$ '
+                  placeholder='Valor'
+                  className='flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
+                  onValueChange={(values: NumberFormatValues) => {
+                    field.onChange(values.floatValue)
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -127,10 +150,10 @@ const FormEditEntity = ({ onSuccess, entityId }: PropsFormEntity) => {
 }
 
 interface Props {
-  entityId: string
+  bankAccountId: string
 }
 
-export function DialogEditEntity({ entityId }: Props) {
+export function DialogEditBankAccount({ bankAccountId }: Props) {
   const [modalOpen, setModalOpen] = useState<boolean>(false)
 
   return (
@@ -145,11 +168,11 @@ export function DialogEditEntity({ entityId }: Props) {
 
       <DialogContent className='sm:max-w-[425px]'>
         <DialogHeader>
-          <DialogTitle>Editar entidade</DialogTitle>
+          <DialogTitle>Editar conta corrente</DialogTitle>
         </DialogHeader>
-        <FormEditEntity
+        <FormEditBankAccount
           onSuccess={() => setModalOpen(false)}
-          entityId={entityId}
+          bankAccountId={bankAccountId}
         />
       </DialogContent>
     </Dialog>

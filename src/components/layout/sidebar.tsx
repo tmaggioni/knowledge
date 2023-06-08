@@ -25,7 +25,12 @@ export function Sidebar({ className }: React.HTMLAttributes<HTMLDivElement>) {
               }}
             />
           </h2>
-
+          <Link href='/dashboard'>
+            <Button variant='ghost' size='sm' className='w-full justify-start'>
+              <User className='mr-2 h-4 w-4' />
+              Dashboard
+            </Button>
+          </Link>
           <div className='space-y-1'>
             {isAdmin && (
               <>
@@ -37,6 +42,16 @@ export function Sidebar({ className }: React.HTMLAttributes<HTMLDivElement>) {
                   >
                     <User className='mr-2 h-4 w-4' />
                     Usuários
+                  </Button>
+                </Link>
+                <Link href='/dashboard/bankAccount'>
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    className='w-full justify-start'
+                  >
+                    <User className='mr-2 h-4 w-4' />
+                    Conta corrente
                   </Button>
                 </Link>
                 <Link href='/dashboard/entity'>

@@ -17,6 +17,7 @@ export const cashFlowRouter = createTRPCRouter({
         entityId: z.string(),
         categoryId: z.string(),
         amount: z.number(),
+        bankAccountId: z.string(),
         date: z.date(),
       }),
     )
@@ -26,6 +27,7 @@ export const cashFlowRouter = createTRPCRouter({
         description,
         type,
         categoryId,
+        bankAccountId,
         entityId,
         status,
         date,
@@ -42,6 +44,7 @@ export const cashFlowRouter = createTRPCRouter({
           type: type as TypePayment,
           status: status as StatusFlow,
           categoryId,
+          bankAccountId,
           month: date.getMonth() + 1,
           entityId,
           date,
@@ -70,6 +73,7 @@ export const cashFlowRouter = createTRPCRouter({
         status: z.string(),
         entityId: z.string(),
         categoryId: z.string(),
+        bankAccountId: z.string(),
         date: z.date(),
         amount: z.number(),
       }),
@@ -81,6 +85,7 @@ export const cashFlowRouter = createTRPCRouter({
         description,
         type,
         categoryId,
+        bankAccountId,
         entityId,
         status,
         date,
@@ -98,6 +103,7 @@ export const cashFlowRouter = createTRPCRouter({
           type: type as TypePayment,
           status: status as StatusFlow,
           categoryId,
+          bankAccountId,
           month: date.getMonth() + 1,
           entityId,
           date,
@@ -125,6 +131,7 @@ export const cashFlowRouter = createTRPCRouter({
             typeFlow: z.array(z.string()).optional(),
             status: z.array(z.string()).optional(),
             categoryId: z.array(z.string()).optional(),
+            bankAccountId: z.array(z.string()).optional(),
             amountRange: z
               .object({
                 minValue: z.number().optional(),
@@ -143,7 +150,16 @@ export const cashFlowRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       const { entityIds, filters } = input
-      const { date, categoryId, name, status, type, typeFlow, amountRange } = {
+      const {
+        date,
+        categoryId,
+        name,
+        status,
+        type,
+        typeFlow,
+        amountRange,
+        bankAccountId,
+      } = {
         ...filters,
       }
       const parent = ctx.parent || ctx.userId
@@ -159,6 +175,9 @@ export const cashFlowRouter = createTRPCRouter({
             },
             categoryId: {
               in: categoryId,
+            },
+            bankAccountId: {
+              in: bankAccountId,
             },
             amount: {
               lte: amountRange?.maxValue,
@@ -207,6 +226,9 @@ export const cashFlowRouter = createTRPCRouter({
             },
             categoryId: {
               in: categoryId,
+            },
+            bankAccountId: {
+              in: bankAccountId,
             },
             amount: {
               lte: amountRange?.maxValue,

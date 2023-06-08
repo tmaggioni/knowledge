@@ -35,7 +35,9 @@ export async function middleware(req: NextRequest) {
   }
 
   if (
-    (req.url.includes('/entity') || req.url.includes('/users')) &&
+    (req.url.includes('/entity') ||
+      req.url.includes('/users') ||
+      req.url.includes('/bankAccount')) &&
     (verifiedToken as UserJwtPayload).parent
   ) {
     return NextResponse.redirect(new URL('/dashboard', req.url))
@@ -50,6 +52,7 @@ export const config = {
     '/',
     '/register',
     '/dashboard/entity',
+    '/dashboard/bankAccount',
     '/dashboard/users',
   ],
 }

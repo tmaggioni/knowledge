@@ -185,7 +185,6 @@ export function DialogPermissions({ userId }: Props) {
         </DialogHeader>
         <FormPermissions
           onSuccess={() => {
-            console.log('eitaa ta chamando eu')
             setModalOpen(false)
           }}
           userId={userId}

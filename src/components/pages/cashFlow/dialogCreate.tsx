@@ -65,6 +65,7 @@ const validationSchema = z.object({
   type: z.string(),
   typeFlow: z.string(),
   status: z.string(),
+  bankAccountId: z.string().optional(),
   categoryId: z.string(),
   amount: z.number().min(1, 'Valor é campo obrigatório'),
   date: z.date(),
@@ -78,6 +79,7 @@ interface Props {
 
 const FormCreateCashFlow = ({ onSuccess }: Props) => {
   const [open, setOpen] = useState(false)
+  const [openBankSelect, setOpenBankSelect] = useState(false)
 
   const entitiesSelected = useHydratedStore('entitiesSelected')
 
@@ -102,12 +104,24 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
     pageSize: 2000,
   })
 
+  const { data: bankAccounts } = api.bankAccount.getAll.useQuery({
+    pageIndex: 0,
+    pageSize: 2000,
+  })
+
   const optionsCategory = useMemo(() => {
     return categories?.categories?.map((item) => ({
       label: item.name,
       value: item.id,
     }))
   }, [categories])
+
+  const optionsBankAccounts = useMemo(() => {
+    return bankAccounts?.bankAccounts?.map((item) => ({
+      label: item.name,
+      value: item.id,
+    }))
+  }, [bankAccounts])
 
   const utils = api.useContext()
 
@@ -118,6 +132,7 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
         description: values.description || '',
         categoryId: values.categoryId,
         date: values.date,
+        bankAccountId: values?.bankAccountId || '',
         entityId: entitiesSelected[0]!,
         status: values.status,
         type: values.type,
@@ -144,6 +159,91 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
         onSubmit={form.handleSubmit(onSubmit)}
         className='flex flex-col gap-2 scroll-auto'
       >
+        <FormField
+          control={form.control}
+          name='bankAccountId'
+          render={({ field }) => (
+            <FormItem className='flex flex-col'>
+              <Popover open={openBankSelect} onOpenChange={setOpenBankSelect}>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant='outline'
+                      role='combobox'
+                      className={cn(
+                        'w-full justify-between',
+                        !field.value && 'text-muted-foreground',
+                      )}
+                    >
+                      {field.value
+                        ? optionsBankAccounts?.find(
+                            (bankAccount) => bankAccount.value === field.value,
+                          )?.label
+                        : 'Categoria'}
+
+                      <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className='w-[200px] p-0'>
+                  <Command
+                    onEmptied={() => setOpenBankSelect(false)}
+                    filter={(value, search) => {
+                      return optionsBankAccounts &&
+                        optionsBankAccounts
+                          .find((item) => item.value === value)
+                          ?.label.includes(search)
+                        ? 1
+                        : 0
+                    }}
+                  >
+                    <CommandInput placeholder='Selecione uma categoria...' />
+                    <CommandEmpty>Conta corrente</CommandEmpty>
+                    <CommandGroup>
+                      <CommandItem
+                        value={''}
+                        onSelect={(value) => {
+                          form.setValue('bankAccountId', value)
+                          setOpen(false)
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            'mr-2 h-4 w-4',
+                            '' === field.value ? 'opacity-100' : 'opacity-0',
+                          )}
+                        />
+                        Nenhuma
+                      </CommandItem>
+                      {optionsBankAccounts?.map((bankAccount) => (
+                        <CommandItem
+                          value={bankAccount.value}
+                          key={bankAccount.value}
+                          onSelect={(value) => {
+                            form.setValue('bankAccountId', value)
+                            setOpen(false)
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              'mr-2 h-4 w-4',
+                              bankAccount.label === field.value
+                                ? 'opacity-100'
+                                : 'opacity-0',
+                            )}
+                          />
+                          {bankAccount.label}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name='typeFlow'

@@ -31,6 +31,7 @@ const validationSchema = z.object({
   type: z.array(z.string()).optional(),
   typeFlow: z.array(z.string()).optional(),
   status: z.array(z.string()).optional(),
+  bankAccountId: z.array(z.string()).optional(),
   categoryId: z.array(z.string()).optional(),
   date: z
     .object({
@@ -65,6 +66,18 @@ export const FiltersRightBar = () => {
     }))
   }, [categories])
 
+  const { data: bankAccounts } = api.bankAccount.getAll.useQuery({
+    pageIndex: 0,
+    pageSize: 2000,
+  })
+
+  const optionsBankAccount = useMemo(() => {
+    return bankAccounts?.bankAccounts?.map((item) => ({
+      label: item.name,
+      value: item.id,
+    }))
+  }, [bankAccounts])
+
   const form = useForm<ValidationFilterSchema>({
     resolver: zodResolver(validationSchema),
     defaultValues: {
@@ -81,6 +94,7 @@ export const FiltersRightBar = () => {
   })
 
   function onSubmit(values: ValidationFilterSchema) {
+    console.log({ values })
     setFilters({
       ...values,
       amountRange: {
@@ -107,6 +121,66 @@ export const FiltersRightBar = () => {
           onSubmit={form.handleSubmit(onSubmit)}
           className='mt-2 flex flex-col gap-2 scroll-auto'
         >
+          <FormField
+            control={form.control}
+            name='categoryId'
+            render={() => (
+              <FormItem>
+                <div className='mb-4'>
+                  <FormLabel className='text-base'>Conta correntes</FormLabel>
+                </div>
+                <div className='flex flex-wrap gap-2'>
+                  {optionsBankAccount?.map((item) => (
+                    <FormField
+                      key={item.value}
+                      control={form.control}
+                      name='bankAccountId'
+                      render={({ field }) => {
+                        return (
+                          <FormItem
+                            key={item.value}
+                            className='flex flex-row items-start space-x-3 space-y-0'
+                          >
+                            <FormControl>
+                              <Button
+                                variant={
+                                  field.value?.includes(item.value)
+                                    ? 'default'
+                                    : 'outline'
+                                }
+                                size='sm'
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  !field.value?.includes(item.value)
+                                    ? field.onChange(
+                                        field.value
+                                          ? [...field.value, item.value]
+                                          : [item.value],
+                                      )
+                                    : field.onChange(
+                                        field.value?.filter(
+                                          (value) => value !== item.value,
+                                        ).length
+                                          ? field.value?.filter(
+                                              (value) => value !== item.value,
+                                            )
+                                          : undefined,
+                                      )
+                                }}
+                              >
+                                {item.label}
+                              </Button>
+                            </FormControl>
+                          </FormItem>
+                        )
+                      }}
+                    />
+                  ))}
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name='typeFlow'
@@ -138,7 +212,12 @@ export const FiltersRightBar = () => {
                                   : field.onChange(
                                       field.value?.filter(
                                         (value) => value !== TypeFlow.INCOME,
-                                      ),
+                                      ).length
+                                        ? field.value?.filter(
+                                            (value) =>
+                                              value !== TypeFlow.INCOME,
+                                          )
+                                        : undefined,
                                     )
                               }}
                             >
@@ -174,7 +253,12 @@ export const FiltersRightBar = () => {
                                   : field.onChange(
                                       field.value?.filter(
                                         (value) => value !== TypeFlow.EXPENSE,
-                                      ),
+                                      ).length
+                                        ? field.value?.filter(
+                                            (value) =>
+                                              value !== TypeFlow.EXPENSE,
+                                          )
+                                        : undefined,
                                     )
                               }}
                             >
@@ -230,7 +314,11 @@ export const FiltersRightBar = () => {
                                     : field.onChange(
                                         field.value?.filter(
                                           (value) => value !== item.value,
-                                        ),
+                                        ).length
+                                          ? field.value?.filter(
+                                              (value) => value !== item.value,
+                                            )
+                                          : undefined,
                                       )
                                 }}
                               >
@@ -282,7 +370,12 @@ export const FiltersRightBar = () => {
                                   : field.onChange(
                                       field.value?.filter(
                                         (value) => value !== TypePayment.TICKET,
-                                      ),
+                                      ).length
+                                        ? field.value?.filter(
+                                            (value) =>
+                                              value !== TypePayment.TICKET,
+                                          )
+                                        : undefined,
                                     )
                               }}
                             >
@@ -319,7 +412,12 @@ export const FiltersRightBar = () => {
                                       field.value?.filter(
                                         (value) =>
                                           value !== TypePayment.TRANSFER,
-                                      ),
+                                      ).length
+                                        ? field.value?.filter(
+                                            (value) =>
+                                              value !== TypePayment.TRANSFER,
+                                          )
+                                        : undefined,
                                     )
                               }}
                             >
@@ -430,7 +528,12 @@ export const FiltersRightBar = () => {
                                   : field.onChange(
                                       field.value?.filter(
                                         (value) => value !== StatusFlow.PAYED,
-                                      ),
+                                      )
+                                        ? field.value?.filter(
+                                            (value) =>
+                                              value !== StatusFlow.PAYED,
+                                          )
+                                        : undefined,
                                     )
                               }}
                             >
@@ -470,7 +573,12 @@ export const FiltersRightBar = () => {
                                       field.value?.filter(
                                         (value) =>
                                           value !== StatusFlow.NOT_PAYDED,
-                                      ),
+                                      ).length
+                                        ? field.value?.filter(
+                                            (value) =>
+                                              value !== StatusFlow.NOT_PAYDED,
+                                          )
+                                        : undefined,
                                     )
                               }}
                             >
