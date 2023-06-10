@@ -27,6 +27,8 @@ interface ValidationFilterSchemaWithAmountRange extends ValidationFilterSchema {
 type AppStoreState = {
   darkOn: boolean
   setDarkOn: (themeMode: boolean) => void
+  entityAll: boolean
+  setEntityAll: (entityAll: boolean) => void
   entityOpened: boolean
   setEntityOpened: (entityOpened: boolean) => void
   user: UserSession | null
@@ -44,6 +46,7 @@ const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0)
 
 const initialStates: OmittedFunctionKeys<AppStoreState> = {
   entityOpened: false,
+  entityAll: false,
   darkOn: false,
   user: null,
   filterOpen: false,
@@ -61,6 +64,8 @@ export const useAppStore = create<AppStoreState>()(
     (set) => ({
       darkOn: false,
       filterOpen: false,
+      entityAll: false,
+      setEntityAll: (entityAll) => set({ entityAll }),
       setFilterOpen: (filterOpen) => set({ filterOpen }),
       setDarkOn: (darkOn) => set({ darkOn }),
       entityOpened: initialStates.entityOpened,

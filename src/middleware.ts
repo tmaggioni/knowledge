@@ -15,6 +15,10 @@ export async function middleware(req: NextRequest) {
   const token = req.cookies.get('user-token')?.value
   const verifiedToken = token && (await verifyAuth(token))
 
+  if (req.nextUrl.pathname === '/') {
+    return NextResponse.redirect(new URL('/dashboard', req.url))
+  }
+
   if (
     (req.nextUrl.pathname.startsWith('/login') ||
       req.nextUrl.pathname.startsWith('/register')) &&
@@ -46,10 +50,10 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
+    '/',
     '/dashboard',
     '/dashboard/users',
     '/login',
-    '/',
     '/register',
     '/dashboard/entity',
     '/dashboard/bankAccount',

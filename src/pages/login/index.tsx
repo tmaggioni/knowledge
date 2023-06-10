@@ -1,7 +1,9 @@
 import Head from 'next/head'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { User } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { z } from 'zod'
@@ -112,6 +114,16 @@ const Login = () => {
               </Button>
             </form>
           </Form>
+          <Link href='/register'>
+            <Button
+              variant='ghost'
+              size='sm'
+              className='mt-2 flex w-full justify-end'
+            >
+              <User className='mr-2 h-4 w-4' />
+              Registrar-se
+            </Button>
+          </Link>
         </div>
       </div>
     </>

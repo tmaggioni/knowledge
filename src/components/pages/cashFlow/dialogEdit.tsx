@@ -203,7 +203,7 @@ const FormEditCashFlow = ({ onSuccess, cashFlowId }: PropsFormEntity) => {
                         ? optionsBankAccounts?.find(
                             (bankAccount) => bankAccount.value === field.value,
                           )?.label
-                        : 'Categoria'}
+                        : 'Conta'}
 
                       <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                     </Button>
@@ -221,7 +221,7 @@ const FormEditCashFlow = ({ onSuccess, cashFlowId }: PropsFormEntity) => {
                         : 0
                     }}
                   >
-                    <CommandInput placeholder='Selecione uma categoria...' />
+                    <CommandInput placeholder='Selecione uma conta...' />
                     <CommandEmpty>Conta corrente</CommandEmpty>
                     <CommandGroup>
                       <CommandItem

@@ -40,6 +40,11 @@ interface Props {
 const FormCreateBankAccount = ({ onSuccess }: Props) => {
   const form = useForm<ValidationSchema>({
     resolver: zodResolver(validationSchema),
+    defaultValues: {
+      name: '',
+      amount: 0,
+      description: '',
+    },
   })
 
   const { mutate: create, isLoading } = api.bankAccount.create.useMutation()

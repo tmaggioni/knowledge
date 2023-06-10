@@ -13,20 +13,18 @@ import { Checkbox } from '../ui/checkbox'
 import { MyLoader } from '../ui/myloader'
 
 export function EntityBar({ className }: React.HTMLAttributes<HTMLDivElement>) {
-  const [selectAll, setSelectAll] = useState(false)
   const user = useHydratedStore('user')
   const entityOpened = useHydratedStore('entityOpened')
   const entitiesSelected = useHydratedStore('entitiesSelected')
   const setEntityOpened = useAppStore((state) => state.setEntityOpened)
   const setEntitiesSelected = useAppStore((state) => state.setEntitiesSelected)
+  const setEntityAll = useAppStore((state) => state.setEntityAll)
+  const entityAll = useHydratedStore('entityAll')
 
   const isAdmin = !Boolean(user?.parent)
 
   const { data: entities, isLoading } = api.entity.getAllByUser.useQuery()
 
-  // if (!entityOpened) {
-  //   return null
-  // }
   const entitiesParentId = useMemo(() => {
     if (!entities) return []
     if (!entities.entitiesParent) return []
@@ -40,7 +38,7 @@ export function EntityBar({ className }: React.HTMLAttributes<HTMLDivElement>) {
   }, [entities])
 
   useEffect(() => {
-    if (selectAll) {
+    if (entityAll) {
       if (isAdmin) {
         setEntitiesSelected(entitiesParentId || [])
       } else {
@@ -53,7 +51,7 @@ export function EntityBar({ className }: React.HTMLAttributes<HTMLDivElement>) {
     entitiesParentId,
     entitiesUsersId,
     isAdmin,
-    selectAll,
+    entityAll,
     setEntitiesSelected,
   ])
 
@@ -83,12 +81,12 @@ export function EntityBar({ className }: React.HTMLAttributes<HTMLDivElement>) {
           <div className='mt-2 flex items-center gap-2'>
             <Checkbox
               id='all'
-              checked={selectAll}
+              checked={entityAll}
               onCheckedChange={(checked) => {
                 if (checked) {
-                  setSelectAll(true)
+                  setEntityAll(true)
                 } else {
-                  setSelectAll(false)
+                  setEntityAll(false)
                 }
               }}
             />

@@ -179,7 +179,7 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
                         ? optionsBankAccounts?.find(
                             (bankAccount) => bankAccount.value === field.value,
                           )?.label
-                        : 'Categoria'}
+                        : 'Conta'}
 
                       <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                     </Button>
@@ -197,7 +197,7 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
                         : 0
                     }}
                   >
-                    <CommandInput placeholder='Selecione uma categoria...' />
+                    <CommandInput placeholder='Selecione uma conta corrente...' />
                     <CommandEmpty>Conta corrente</CommandEmpty>
                     <CommandGroup>
                       <CommandItem

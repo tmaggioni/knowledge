@@ -1,4 +1,4 @@
-import { type StatusFlow, TypeFlow, type TypePayment } from '@prisma/client'
+import { StatusFlow, TypeFlow, type TypePayment } from '@prisma/client'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
@@ -164,7 +164,7 @@ export const cashFlowRouter = createTRPCRouter({
       }
       const parent = ctx.parent || ctx.userId
 
-      const [cashFlow, total] = await ctx.prisma.$transaction([
+      const [cashFlow, typeFlowItems, total] = await ctx.prisma.$transaction([
         ctx.prisma.cashFlow.findMany({
           where: {
             entityId: {
@@ -216,6 +216,26 @@ export const cashFlowRouter = createTRPCRouter({
           skip: input.pageIndex,
           take: input.pageSize,
         }),
+        ctx.prisma.cashFlow.groupBy({
+          by: ['typeFlow'],
+          _sum: {
+            amount: true,
+          },
+          where: {
+            entityId: {
+              in: entityIds,
+            },
+            date: {
+              gte: new Date(new Date().getFullYear(), 0, 1),
+              lt: new Date(new Date().getFullYear(), 11, 1),
+            },
+            parentId: parent as string,
+          },
+          orderBy: {
+            // Add your field to sort by here
+            typeFlow: 'asc', // or "desc"
+          },
+        }),
         ctx.prisma.cashFlow.count({
           where: {
             entityId: {
@@ -264,19 +284,30 @@ export const cashFlowRouter = createTRPCRouter({
         }),
       ])
 
-      const totalProfit = cashFlow.reduce((profit, transaction) => {
-        if (transaction.typeFlow === TypeFlow.INCOME) {
-          return profit + Number(transaction.amount)
-        } else if (transaction.typeFlow === TypeFlow.EXPENSE) {
-          return profit - Number(transaction.amount)
-        } else {
-          return profit
-        }
-      }, 0)
+      // const totalProfit = cashFlow.reduce((profit, transaction) => {
+      //   if (transaction.typeFlow === TypeFlow.INCOME) {
+      //     return profit + Number(transaction.amount)
+      //   } else if (transaction.typeFlow === TypeFlow.EXPENSE) {
+      //     return profit - Number(transaction.amount)
+      //   } else {
+      //     return profit
+      //   }
+      // }, 0)
+
+      const income = Number(
+        typeFlowItems.find((item) => item.typeFlow === 'INCOME')?._sum
+          ?.amount || 0,
+      )
+      const expense = Number(
+        typeFlowItems.find((item) => item.typeFlow === 'EXPENSE')?._sum
+          ?.amount || 0,
+      )
+
+      console.log({ income, expense })
       return {
         cashFlow,
         total,
-        totalProfit,
+        totalProfit: income - expense,
       }
     }),
 
@@ -415,6 +446,78 @@ export const cashFlowRouter = createTRPCRouter({
             value: Number(record._sum.amount),
           })
         }
+      }
+
+      return result
+    }),
+  getCashFlowByAccount: privateProcedure
+    .input(z.object({ entityIds: z.array(z.string()) }))
+    .query(async ({ ctx, input }) => {
+      const { entityIds } = input
+      const parent = ctx.parent || ctx.userId
+
+      const income = await ctx.prisma.cashFlow.groupBy({
+        by: ['bankAccountId'],
+        _sum: {
+          amount: true,
+        },
+        where: {
+          entityId: {
+            in: entityIds,
+          },
+          date: {
+            gte: new Date(new Date().getFullYear(), 0, 1),
+            lt: new Date(new Date().getFullYear(), 11, 1),
+          },
+          typeFlow: TypeFlow.INCOME,
+          status: StatusFlow.PAYED,
+          parentId: parent as string,
+        },
+      })
+
+      const expense = await ctx.prisma.cashFlow.groupBy({
+        by: ['bankAccountId'],
+        _sum: {
+          amount: true,
+        },
+        where: {
+          entityId: {
+            in: entityIds,
+          },
+          date: {
+            gte: new Date(new Date().getFullYear(), 0, 1),
+            lt: new Date(new Date().getFullYear(), 11, 1),
+          },
+          status: StatusFlow.PAYED,
+          typeFlow: TypeFlow.EXPENSE,
+          parentId: parent as string,
+        },
+      })
+
+      const allBankAccounts = await ctx.prisma.bankAccount.findMany({
+        where: {
+          parentId: parent as string,
+        },
+      })
+
+      const result = []
+
+      for (const record of allBankAccounts) {
+        const bankAccountIncome =
+          Number(
+            income.find((item) => item.bankAccountId === record.id)?._sum
+              .amount,
+          ) || 0
+        const bankAccountExpense =
+          Number(
+            expense.find((item) => item.bankAccountId === record.id)?._sum
+              .amount,
+          ) || 0
+
+        result.push({
+          bankAccount: record.name,
+          value: bankAccountIncome - bankAccountExpense,
+        })
       }
 
       return result
