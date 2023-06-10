@@ -54,6 +54,8 @@ import { useHydratedStore } from '~/hooks/useAppStore'
 import { cn } from '~/lib/utils'
 import { api } from '~/utils/api'
 
+import DialogCreateCategory from '../categories/dialogCreate'
+
 const validationSchema = z.object({
   name: z.string(),
   description: z.string().optional(),
@@ -61,7 +63,7 @@ const validationSchema = z.object({
   typeFlow: z.string(),
   status: z.string().optional(),
   categoryId: z.string(),
-  bankAccountId: z.string().optional(),
+  bankAccountId: z.string(),
   amount: z.number().min(1, 'Valor é campo obrigatório'),
   date: z.date(),
 })
@@ -179,10 +181,7 @@ const FormEditCashFlow = ({ onSuccess, cashFlowId }: PropsFormEntity) => {
   }
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className='flex flex-col space-y-2'
-      >
+      <form className='flex flex-col space-y-2'>
         <FormField
           control={form.control}
           name='bankAccountId'
@@ -203,7 +202,7 @@ const FormEditCashFlow = ({ onSuccess, cashFlowId }: PropsFormEntity) => {
                         ? optionsBankAccounts?.find(
                             (bankAccount) => bankAccount.value === field.value,
                           )?.label
-                        : 'Conta'}
+                        : 'conta corrente'}
 
                       <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                     </Button>
@@ -221,24 +220,9 @@ const FormEditCashFlow = ({ onSuccess, cashFlowId }: PropsFormEntity) => {
                         : 0
                     }}
                   >
-                    <CommandInput placeholder='Selecione uma conta...' />
+                    <CommandInput placeholder='Selecione uma conta corrente...' />
                     <CommandEmpty>Conta corrente</CommandEmpty>
                     <CommandGroup>
-                      <CommandItem
-                        value={''}
-                        onSelect={(value) => {
-                          form.setValue('bankAccountId', value)
-                          setOpen(false)
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            'mr-2 h-4 w-4',
-                            '' === field.value ? 'opacity-100' : 'opacity-0',
-                          )}
-                        />
-                        Nenhuma
-                      </CommandItem>
                       {optionsBankAccounts?.map((bankAccount) => (
                         <CommandItem
                           value={bankAccount.value}
@@ -382,6 +366,9 @@ const FormEditCashFlow = ({ onSuccess, cashFlowId }: PropsFormEntity) => {
                           {category.label}
                         </CommandItem>
                       ))}
+                      <CommandItem>
+                        <DialogCreateCategory isLink />
+                      </CommandItem>
                     </CommandGroup>
                   </Command>
                 </PopoverContent>
@@ -503,7 +490,7 @@ const FormEditCashFlow = ({ onSuccess, cashFlowId }: PropsFormEntity) => {
             </FormItem>
           )}
         />
-        <Button type='submit' disabled={isLoadingEdit}>
+        <Button onClick={form.handleSubmit(onSubmit)} disabled={isLoadingEdit}>
           {isLoadingEdit && <MyLoader />}
           Editar
         </Button>

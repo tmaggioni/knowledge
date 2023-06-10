@@ -212,8 +212,9 @@ export const cashFlowRouter = createTRPCRouter({
           },
           include: {
             category: { select: { name: true } },
+            bankAccount: { select: { name: true } },
           },
-          skip: input.pageIndex,
+          skip: input.pageIndex * input.pageSize,
           take: input.pageSize,
         }),
         ctx.prisma.cashFlow.groupBy({
@@ -225,9 +226,43 @@ export const cashFlowRouter = createTRPCRouter({
             entityId: {
               in: entityIds,
             },
+            name: {
+              contains: name,
+            },
+            categoryId: {
+              in: categoryId,
+            },
+            bankAccountId: {
+              in: bankAccountId,
+            },
+            amount: {
+              lte: amountRange?.maxValue,
+              gte: amountRange?.minValue,
+            },
+            type: {
+              in:
+                type && type?.length > 0 ? (type as TypePayment[]) : undefined,
+            },
+            typeFlow: {
+              in:
+                typeFlow && typeFlow?.length > 0
+                  ? (typeFlow as TypeFlow[])
+                  : undefined,
+            },
+            status: {
+              in:
+                status && status?.length > 0
+                  ? (status as StatusFlow[])
+                  : undefined,
+            },
+
             date: {
-              gte: new Date(new Date().getFullYear(), 0, 1),
-              lt: new Date(new Date().getFullYear(), 11, 1),
+              lte: new Date(
+                new Date(date?.to || new Date()).setHours(23, 59, 59, 999),
+              ),
+              gte: new Date(
+                new Date(date?.from || new Date()).setHours(0, 0, 0, 0),
+              ),
             },
             parentId: parent as string,
           },

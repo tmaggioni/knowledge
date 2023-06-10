@@ -16,7 +16,7 @@ const BRL = new Intl.NumberFormat('pt-BR', {
 
 export function PieKnowledge() {
   const entitiesSelected = useHydratedStore('entitiesSelected')
-  const { data: expenses, isLoading } =
+  const { data: expenses, isFetching } =
     api.cashFlow.getTheExpensePieData.useQuery(
       {
         entityIds: entitiesSelected,
@@ -26,7 +26,7 @@ export function PieKnowledge() {
       },
     )
 
-  const { data: incomes, isLoading: isLoadingIncomings } =
+  const { data: incomes, isFetching: isLoadingIncomings } =
     api.cashFlow.getTheIncomePieData.useQuery(
       {
         entityIds: entitiesSelected,

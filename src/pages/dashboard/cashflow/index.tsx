@@ -151,6 +151,9 @@ const CashFlow = () => {
       category: {
         name: string
       }
+      bankAccount: {
+        name: string
+      }
     }
   >[] = [
     {
@@ -160,6 +163,15 @@ const CashFlow = () => {
     {
       accessorKey: 'description',
       header: 'Descrição',
+    },
+    {
+      accessorKey: 'bankAccount',
+      header: 'Conta corrente',
+      cell: ({ row }) => {
+        const cashFlow = row.original
+
+        return <>{cashFlow.bankAccount.name}</>
+      },
     },
     {
       accessorKey: 'type',

@@ -7,7 +7,7 @@ import { api } from '~/utils/api'
 
 export const BankAccount = () => {
   const entitiesSelected = useHydratedStore('entitiesSelected')
-  const { data: bankAccounts, isLoading } =
+  const { data: bankAccounts, isFetching } =
     api.cashFlow.getCashFlowByAccount.useQuery(
       {
         entityIds: entitiesSelected,
@@ -17,7 +17,7 @@ export const BankAccount = () => {
       },
     )
 
-  if (isLoading)
+  if (isFetching)
     return (
       <div className='flex h-full w-full items-center justify-center'>
         <MyLoader />

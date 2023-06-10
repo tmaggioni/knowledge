@@ -21,7 +21,7 @@ const BRL = new Intl.NumberFormat('pt-BR', {
 
 export function BarKnowledge() {
   const entitiesSelected = useHydratedStore('entitiesSelected')
-  const { data, isLoading } = api.cashFlow.getTheBarData.useQuery(
+  const { data, isFetching } = api.cashFlow.getTheBarData.useQuery(
     {
       entityIds: entitiesSelected,
     },
@@ -30,7 +30,7 @@ export function BarKnowledge() {
     },
   )
 
-  if (isLoading)
+  if (isFetching)
     return (
       <div className='flex h-full w-full items-center justify-center'>
         <MyLoader />

@@ -58,7 +58,7 @@ export const categoryRouter = createTRPCRouter({
       const [categories, total] = await ctx.prisma.$transaction([
         ctx.prisma.category.findMany({
           where: { parentId: parent as string },
-          skip: input.pageIndex,
+          skip: input.pageIndex * input.pageSize,
           take: input.pageSize,
         }),
         ctx.prisma.category.count({

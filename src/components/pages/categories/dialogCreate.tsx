@@ -48,7 +48,7 @@ const FormCreateCategory = ({ onSuccess }: Props) => {
       { name: values.name, description: values.description || '' },
       {
         onSuccess: (data) => {
-          toast(`Entidade ${data.name} adicionada com sucesso`)
+          toast(`Categoria ${data.name} adicionada com sucesso`)
           void utils.category.getAll.invalidate()
           onSuccess()
         },
@@ -100,14 +100,30 @@ const FormCreateCategory = ({ onSuccess }: Props) => {
   )
 }
 
-export default function DialogCreateCategory() {
+interface PropsDialogCategory {
+  isLink?: boolean
+}
+
+export default function DialogCreateCategory({ isLink }: PropsDialogCategory) {
   const [modalOpen, setModalOpen] = useState<boolean | undefined>(false)
 
   return (
     <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-      <Button variant='default' onClick={() => setModalOpen(true)}>
-        Nova categoria
-      </Button>
+      {!isLink && (
+        <Button variant='default' onClick={() => setModalOpen(true)}>
+          Nova categoria
+        </Button>
+      )}
+
+      {isLink && (
+        <Button
+          variant='link'
+          className='text-xs underline'
+          onClick={() => setModalOpen(true)}
+        >
+          Adicionar
+        </Button>
+      )}
 
       <DialogContent className='sm:max-w-[425px]'>
         <DialogHeader>

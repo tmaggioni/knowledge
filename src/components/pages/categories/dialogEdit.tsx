@@ -58,7 +58,7 @@ const FormEditCategory = ({ onSuccess, categoryId }: PropsFormEntity) => {
       },
       {
         onSuccess: (data) => {
-          toast(`Entidade ${data.name} editada com sucesso`, {
+          toast(`Categorias ${data.name} editada com sucesso`, {
             type: 'success',
           })
           void utils.category.getAll.invalidate()

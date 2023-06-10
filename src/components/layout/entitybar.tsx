@@ -44,9 +44,11 @@ export function EntityBar({ className }: React.HTMLAttributes<HTMLDivElement>) {
       } else {
         setEntitiesSelected(entitiesUsersId || [])
       }
-    } else {
-      setEntitiesSelected([])
     }
+
+    // else {
+    //   setEntitiesSelected([])
+    // }
   }, [
     entitiesParentId,
     entitiesUsersId,

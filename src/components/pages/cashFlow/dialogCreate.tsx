@@ -53,6 +53,8 @@ import { useHydratedStore } from '~/hooks/useAppStore'
 import { cn } from '~/lib/utils'
 import { api } from '~/utils/api'
 
+import DialogCreateCategory from '../categories/dialogCreate'
+
 type NumberFormatValues = {
   floatValue: number | undefined
   formattedValue: string
@@ -65,7 +67,7 @@ const validationSchema = z.object({
   type: z.string(),
   typeFlow: z.string(),
   status: z.string(),
-  bankAccountId: z.string().optional(),
+  bankAccountId: z.string(),
   categoryId: z.string(),
   amount: z.number().min(1, 'Valor é campo obrigatório'),
   date: z.date(),
@@ -155,10 +157,7 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
   }
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className='flex flex-col gap-2 scroll-auto'
-      >
+      <form className='flex flex-col gap-2 scroll-auto'>
         <FormField
           control={form.control}
           name='bankAccountId'
@@ -200,21 +199,6 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
                     <CommandInput placeholder='Selecione uma conta corrente...' />
                     <CommandEmpty>Conta corrente</CommandEmpty>
                     <CommandGroup>
-                      <CommandItem
-                        value={''}
-                        onSelect={(value) => {
-                          form.setValue('bankAccountId', value)
-                          setOpen(false)
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            'mr-2 h-4 w-4',
-                            '' === field.value ? 'opacity-100' : 'opacity-0',
-                          )}
-                        />
-                        Nenhuma
-                      </CommandItem>
                       {optionsBankAccounts?.map((bankAccount) => (
                         <CommandItem
                           value={bankAccount.value}
@@ -279,9 +263,21 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
           name='name'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nome</FormLabel>
               <FormControl>
                 <Input placeholder='Nome' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name='description'
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Textarea placeholder='Descrição' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -293,7 +289,6 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
           name='categoryId'
           render={({ field }) => (
             <FormItem className='flex flex-col'>
-              <FormLabel>Categoria</FormLabel>
               <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -349,6 +344,9 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
                           {category.label}
                         </CommandItem>
                       ))}
+                      <CommandItem>
+                        <DialogCreateCategory isLink />
+                      </CommandItem>
                     </CommandGroup>
                   </Command>
                 </PopoverContent>
@@ -364,7 +362,6 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
           name='type'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Forma da pagamento</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
@@ -388,7 +385,6 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
           name='amount'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Valor</FormLabel>
               <FormControl>
                 <NumericFormat
                   thousandSeparator='.'
@@ -411,7 +407,6 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
           name='date'
           render={({ field }) => (
             <FormItem className='flex flex-col'>
-              <FormLabel>Data vencimento</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -449,20 +444,6 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
 
         <FormField
           control={form.control}
-          name='description'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descrição</FormLabel>
-              <FormControl>
-                <Textarea placeholder='Descrição' {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
           name='status'
           render={({ field }) => (
             <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
@@ -488,7 +469,7 @@ const FormCreateCashFlow = ({ onSuccess }: Props) => {
         />
 
         <div className='col-span-2'>
-          <Button type='submit' disabled={isLoading}>
+          <Button onClick={form.handleSubmit(onSubmit)} disabled={isLoading}>
             {isLoading && <MyLoader />}
             Salvar
           </Button>
