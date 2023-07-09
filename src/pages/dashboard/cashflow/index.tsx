@@ -9,7 +9,6 @@ import {
 import { type ColumnDef, type PaginationState } from '@tanstack/react-table'
 import { format, isBefore } from 'date-fns'
 import { AlertTriangle, Loader } from 'lucide-react'
-import { NumericFormat } from 'react-number-format'
 import { toast } from 'react-toastify'
 
 import Layout from '~/components/layout/layout'

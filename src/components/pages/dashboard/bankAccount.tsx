@@ -1,5 +1,3 @@
-import { NumericFormat } from 'react-number-format'
-
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { MyLoader } from '~/components/ui/myloader'
 import { useHydratedStore } from '~/hooks/useAppStore'
