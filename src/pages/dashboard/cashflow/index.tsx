@@ -230,7 +230,16 @@ const CashFlow = () => {
             <div className={isPositive ? 'text-[green]' : 'text-destructive'}>
               {isPositive ? '+' : '-'}
             </div>
-            <NumericFormat
+            <span
+              className={`${isPositive ? 'text-[green]' : 'text-destructive'}
+                bg-transparent `}
+            >
+              {Number(cashFlow.amount).toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+              })}
+            </span>
+            {/* <NumericFormat
               thousandSeparator='.'
               decimalSeparator=','
               prefix='R$ '
@@ -240,7 +249,7 @@ const CashFlow = () => {
               } `}
               disabled
               value={Number(cashFlow.amount)}
-            />
+            /> */}
           </div>
         )
       },
@@ -324,20 +333,22 @@ const CashFlow = () => {
                 total={cashFlowResponse?.total}
               />
               <div className={`flex w-full justify-center `}>
-                <NumericFormat
-                  thousandSeparator='.'
-                  decimalSeparator=','
-                  prefix='R$ '
-                  placeholder='Valor'
+                <span
                   className={`bg-transparent text-center text-2xl font-bold ${
                     cashFlowResponse?.totalProfit &&
                     cashFlowResponse?.totalProfit >= 0
                       ? 'text-[green]'
                       : 'text-destructive'
                   } `}
-                  disabled
-                  value={cashFlowResponse?.totalProfit}
-                />
+                >
+                  {Number(cashFlowResponse?.totalProfit).toLocaleString(
+                    'pt-BR',
+                    {
+                      style: 'currency',
+                      currency: 'BRL',
+                    },
+                  )}
+                </span>
               </div>
             </>
           )}

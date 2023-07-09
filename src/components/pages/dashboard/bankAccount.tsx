@@ -27,6 +27,7 @@ export const BankAccount = () => {
   if (bankAccounts?.length === 0) {
     return null
   }
+
   return (
     <>
       {bankAccounts?.map((item) => (
@@ -38,16 +39,17 @@ export const BankAccount = () => {
           </CardHeader>
           <CardContent>
             <div className='text-2xl font-bold'>
-              <NumericFormat
-                thousandSeparator='.'
-                decimalSeparator=','
-                prefix='R$ '
-                className={`bg-transparent ${
+              <span
+                className={`${
                   item.value > 0 ? 'text-[green]' : 'text-destructive'
-                } `}
-                disabled
-                value={Number(item.value)}
-              />
+                }
+                bg-transparent `}
+              >
+                {item.value.toLocaleString('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL',
+                })}
+              </span>
             </div>
             {/* <p className='text-xs text-muted-foreground'>
               +20.1% from last month
